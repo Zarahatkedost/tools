@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code scanner · Sahil's tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<style>
+  :root{--paper:#F5F2EC;--ink:#1C1B19;--line:#DEDACF;--line2:#CBC6B8;--accent:#1F4FD8;--accent-ink:#15379a;--muted:#6E6A60;--card:#FCFAF6;--ok:#1D7D53;--radius:12px;--ctrl:10px;}
+  *{box-sizing:border-box;}html,body{margin:0;}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:640px;margin:0 auto;padding:20px 20px 64px;}
+  header.site{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 22px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;}
+  .brand .mark{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;}
+  .brand a{color:inherit;text-decoration:none;}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ok);font-weight:500;}.privacy svg{width:15px;height:15px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);text-decoration:none;margin-bottom:14px;}.back svg{width:15px;height:15px;}.back:hover{color:var(--ink);}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,44px);letter-spacing:-0.02em;margin:0 0 6px;}
+  .sub{font-size:15px;color:var(--muted);margin:0 0 24px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
+  #reader{width:100%;border-radius:10px;overflow:hidden;}
+  #reader video{border-radius:10px;}
+  .btn{font-family:'Inter';font-size:14px;font-weight:500;padding:11px 16px;border-radius:var(--ctrl);cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:all .15s;}
+  .btn:hover{background:#F3EFE6;}.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}.btn.primary:hover{background:var(--accent-ink);}.btn svg{width:16px;height:16px;}
+  .btn.full{width:100%;}
+  .result{margin-top:16px;background:#fff;border:1px solid var(--line2);border-radius:var(--ctrl);padding:14px;display:none;}
+  .result.show{display:block;}
+  .rlabel{font-size:12px;color:var(--muted);margin:0 0 4px;text-transform:uppercase;letter-spacing:0.04em;}
+  .rval{font-family:'JetBrains Mono',monospace;font-size:14px;word-break:break-all;margin:0 0 12px;}
+  .ractions{display:flex;gap:8px;flex-wrap:wrap;}
+  .ractions .btn{font-size:13px;padding:8px 12px;}
+  .foot{margin-top:34px;font-size:12.5px;color:var(--muted);text-align:center;}
+  .hint{font-size:12.5px;color:var(--muted);margin-top:12px;text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <div class="brand"><span class="mark">S</span><a href="/">sahil's tools</a></div>
+    <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Camera stays on your device</span>
+  </header>
+  <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>All tools</a>
+  <h1>Code scanner</h1>
+  <p class="sub">Point your camera at a QR code or barcode to read it. Nothing is uploaded — decoding happens right here in your browser.</p>
+
+  <div class="panel">
+    <div id="reader"></div>
+    <div style="margin-top:14px;display:flex;gap:8px;">
+      <button class="btn primary full" id="startBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Start camera</button>
+      <button class="btn full" id="uploadBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M8 8l4-4 4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Upload image</button>
+      <button class="btn full" id="stopBtn" style="display:none;">Stop</button>
+    </div>
+    <input type="file" id="imgInput" accept="image/*" hidden>
+    <p class="hint" id="hint">Scan with your camera, or upload a photo/screenshot of a code. Reads QR codes and common barcodes (EAN, UPC, Code128, and more).</p>
+
+    <div class="result" id="result">
+      <p class="rlabel" id="rtype">Result</p>
+      <p class="rval" id="rval"></p>
+      <div class="ractions">
+        <button class="btn" id="openBtn" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg>Open link</button>
+        <button class="btn" id="copyBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
+        <button class="btn" id="againBtn">Scan another</button>
+      </div>
+    </div>
+  </div>
+  <p class="foot">Made for sahilshaikh.org · runs entirely in your browser</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var scanner=null, running=false;
+
+  function isUrl(s){ return /^(https?:\/\/|www\.)/i.test(s.trim()); }
+
+  function onScan(text, result){
+    stop();
+    var fmt=(result && result.result && result.result.format && result.result.format.formatName) || "Code";
+    $("rtype").textContent=fmt;
+    $("rval").textContent=text;
+    $("result").classList.add("show");
+    var ob=$("openBtn");
+    if(isUrl(text)){ ob.style.display="inline-flex"; ob.onclick=function(){ var u=text.trim(); if(!/^https?:\/\//i.test(u)) u="https://"+u; window.open(u,"_blank"); }; }
+    else { ob.style.display="none"; }
+    $("copyBtn").onclick=function(){ navigator.clipboard && navigator.clipboard.writeText(text); this.textContent="Copied"; var b=this; setTimeout(function(){b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy';},1500); };
+  }
+
+  function start(){
+    if(running) return;
+    $("result").classList.remove("show");
+    scanner=new Html5Qrcode("reader");
+    var config={fps:10, qrbox:function(w,h){var m=Math.min(w,h);return {width:Math.floor(m*0.75),height:Math.floor(m*0.75)};}};
+    scanner.start({facingMode:"environment"}, config, onScan, function(){})
+      .then(function(){ running=true; $("startBtn").style.display="none"; $("stopBtn").style.display="block"; $("hint").textContent="Point at a code…"; })
+      .catch(function(err){ $("hint").textContent="Couldn't open camera. Check permission and that you're on https:// or localhost."; });
+  }
+  function stop(){
+    if(scanner && running){ scanner.stop().then(function(){scanner.clear();}).catch(function(){}); }
+    running=false; $("startBtn").style.display="block"; $("stopBtn").style.display="none";
+  }
+
+  $("startBtn").onclick=start;
+  $("stopBtn").onclick=function(){ stop(); $("hint").textContent="Stopped."; };
+  $("againBtn").onclick=function(){ $("result").classList.remove("show"); $("hint").textContent="Scan with your camera, or upload a photo/screenshot of a code."; };
+
+  // ---- upload / scan from image file ----
+  $("uploadBtn").onclick=function(){ $("imgInput").click(); };
+  $("imgInput").onchange=function(){
+    var f=this.files[0]; this.value="";
+    if(!f) return;
+    stop();
+    $("result").classList.remove("show");
+    $("hint").textContent="Reading image…";
+    var fileScanner=new Html5Qrcode("reader");
+    fileScanner.scanFile(f, true)
+      .then(function(decoded){
+        $("hint").textContent="Read from image.";
+        // scanFile returns a string in this version
+        onScan(decoded, {result:{format:{formatName:"From image"}}});
+        try{ fileScanner.clear(); }catch(e){}
+      })
+      .catch(function(err){
+        $("hint").textContent="Couldn't find a readable code in that image. Try a clearer, straighter, well-lit shot.";
+        try{ fileScanner.clear(); }catch(e){}
+      });
+  };
+})();
+</script>
+</body>
+</html>

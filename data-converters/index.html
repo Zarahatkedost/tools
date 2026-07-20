@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Converters Studio</title>
+    <style>
+        :root {
+            --accent: #000000;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --border: #E5E7EB;
+            --bg-light: #F9FAFB;
+            --bg-white: #FFFFFF;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; background: var(--bg-white); color: var(--text-primary); }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem 1rem; }
+        .back-link { display: inline-block; margin-bottom: 1rem; color: var(--accent); text-decoration: none; font-size: 0.875rem; font-weight: 500; }
+        h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .explainer { background: var(--bg-light); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; }
+        .explainer h3 { font-size: 0.875rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .tab-container { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 2rem; overflow-x: auto; }
+        .tab-btn { flex: 1; min-width: 110px; padding: 1rem; background: none; border: none; border-bottom: 3px solid transparent; font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); cursor: pointer; white-space: nowrap; }
+        .tab-btn.active { color: var(--text-primary); border-bottom-color: var(--accent); }
+        .tool-section { display: none; }
+        .tool-section.active { display: block; }
+        .card { background: var(--bg-white); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .card-title { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; }
+        input, textarea, select { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-family: 'Courier New', monospace; font-size: 0.9rem; color: var(--text-primary); background: var(--bg-white); }
+        input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+        textarea { resize: vertical; min-height: 100px; }
+        button { padding: 0.65rem 1.25rem; background: var(--accent); color: white; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        button:hover { opacity: 0.9; }
+        .btn-secondary { background: var(--bg-light); color: var(--text-primary); border: 1px solid var(--border); }
+        .flex-row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end; }
+        .flex-col { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; min-width: 150px; }
+        .mt-1 { margin-top: 1rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-muted { color: var(--text-secondary); }
+        .output-box { background: var(--bg-light); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-top: 1rem; font-family: 'Courier New', monospace; font-size: 0.85rem; word-break: break-all; max-height: 200px; overflow-y: auto; }
+        .info-box { background: var(--bg-light); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-top: 1rem; line-height: 1.6; font-size: 0.9rem; }
+        .info-label { font-weight: 600; color: var(--text-primary); margin-top: 0.75rem; margin-bottom: 0.25rem; }
+        .cron-field { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem; font-size: 0.85rem; }
+        .cron-field-label { font-weight: 600; min-width: 80px; color: var(--text-secondary); }
+        .cron-field-value { background: var(--bg-light); padding: 0.25rem 0.5rem; border-radius: 3px; font-family: 'Courier New', monospace; }
+        @media (max-width: 640px) { .container { padding: 1rem; } h1 { font-size: 1.5rem; } .tab-btn { min-width: 90px; font-size: 0.8rem; padding: 0.75rem; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Tools</a>
+        <h1>Data Converters</h1>
+        
+        <div class="explainer">
+            <h3>What This Does</h3>
+            <p>Three converters for common data formats: Unix timestamp ↔ human-readable date, number base conversion (binary, octal, hex, decimal), and cron expression parser with plain-English explanation.</p>
+        </div>
+
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchTab('timestamp')">Timestamp</button>
+            <button class="tab-btn" onclick="switchTab('base')">Number Base</button>
+            <button class="tab-btn" onclick="switchTab('cron')">Cron</button>
+        </div>
+
+        <!-- TIMESTAMP CONVERTER -->
+        <div id="timestamp" class="tool-section active">
+            <div class="card">
+                <div class="card-title">Unix Timestamp Converter</div>
+                
+                <div class="flex-row">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Unix Timestamp (seconds)</label>
+                        <input type="number" id="ts-unix" placeholder="1609459200" oninput="convertTimestamp()">
+                    </div>
+                    <button onclick="getCurrentTimestamp()">Now</button>
+                </div>
+
+                <div class="output-box mt-1" id="ts-readable">—</div>
+
+                <div class="flex-row mt-1">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Date & Time</label>
+                        <input type="datetime-local" id="ts-datetime" oninput="convertFromDatetime()">
+                    </div>
+                </div>
+
+                <div class="output-box mt-1">Unix: <span id="ts-output-unix">—</span></div>
+
+                <div class="flex-row mt-1">
+                    <button onclick="copyValue('ts-output-unix')">Copy Timestamp</button>
+                    <button onclick="copyValue('ts-readable')" class="btn-secondary">Copy Date</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- NUMBER BASE CONVERTER -->
+        <div id="base" class="tool-section">
+            <div class="card">
+                <div class="card-title">Number Base Converter</div>
+
+                <div class="flex-row">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Decimal (Base 10)</label>
+                        <input type="number" id="base-dec" placeholder="255" oninput="convertBase()">
+                    </div>
+                </div>
+
+                <div class="info-box mt-1">
+                    <div class="info-label">Binary (Base 2)</div>
+                    <div class="output-box" id="base-bin" style="margin: 0.5rem 0;">—</div>
+
+                    <div class="info-label">Octal (Base 8)</div>
+                    <div class="output-box" id="base-oct" style="margin: 0.5rem 0;">—</div>
+
+                    <div class="info-label">Hexadecimal (Base 16)</div>
+                    <div class="output-box" id="base-hex" style="margin: 0.5rem 0;">—</div>
+                </div>
+
+                <div class="flex-row mt-1">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Or paste Hex/Binary/Octal</label>
+                        <input type="text" id="base-input" placeholder="FF or 11111111 or 377" oninput="convertFromOther()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CRON EXPLAINER -->
+        <div id="cron" class="tool-section">
+            <div class="card">
+                <div class="card-title">Cron Expression Explainer</div>
+                <p class="text-sm text-muted" style="margin-bottom: 1rem;">Paste a cron expression to see what it does in plain English.</p>
+
+                <div class="flex-col">
+                    <label class="text-sm text-muted">Cron Expression</label>
+                    <input type="text" id="cron-input" placeholder="0 9 * * MON-FRI" oninput="parseCron()">
+                </div>
+
+                <div class="info-box mt-2">
+                    <div id="cron-output"></div>
+                </div>
+
+                <div style="background: var(--bg-light); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-top: 1rem; font-size: 0.85rem;">
+                    <div style="font-weight: 600; margin-bottom: 0.75rem;">Cron Format</div>
+                    <div style="font-family: 'Courier New', monospace; margin-bottom: 0.5rem;">minute hour day month weekday</div>
+                    <div style="color: var(--text-secondary); font-size: 0.8rem;">Examples: */5 * * * * (every 5 min) | 0 0 * * 0 (weekly Sunday midnight) | 0 9 * * 1-5 (weekdays 9am)</div>
+                </div>
+
+                <div class="flex-row mt-1">
+                    <button onclick="setCronExample('*/5 * * * *')">Every 5 min</button>
+                    <button onclick="setCronExample('0 9 * * MON-FRI')" class="btn-secondary">Weekdays 9am</button>
+                    <button onclick="setCronExample('0 0 1 * *')" class="btn-secondary">Monthly 1st</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tool-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function copyValue(id) {
+            const val = document.getElementById(id).textContent || document.getElementById(id).value;
+            navigator.clipboard.writeText(val).then(() => {
+                const btn = event.target;
+                const orig = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => btn.textContent = orig, 2000);
+            });
+        }
+
+        // ===== TIMESTAMP =====
+        function convertTimestamp() {
+            const unix = parseInt(document.getElementById('ts-unix').value);
+            if (!unix && unix !== 0) {
+                document.getElementById('ts-readable').textContent = '—';
+                return;
+            }
+
+            const date = new Date(unix * 1000);
+            document.getElementById('ts-readable').textContent = date.toLocaleString() + ' UTC\n(' + date.toISOString() + ')';
+            document.getElementById('ts-output-unix').textContent = unix;
+
+            // Set datetime input
+            document.getElementById('ts-datetime').value = date.toISOString().slice(0, 16);
+        }
+
+        function convertFromDatetime() {
+            const datetime = document.getElementById('ts-datetime').value;
+            if (!datetime) {
+                document.getElementById('ts-unix').value = '';
+                return;
+            }
+
+            const date = new Date(datetime);
+            const unix = Math.floor(date.getTime() / 1000);
+            document.getElementById('ts-unix').value = unix;
+            convertTimestamp();
+        }
+
+        function getCurrentTimestamp() {
+            const now = Math.floor(Date.now() / 1000);
+            document.getElementById('ts-unix').value = now;
+            convertTimestamp();
+        }
+
+        // ===== NUMBER BASE =====
+        function convertBase() {
+            const dec = parseInt(document.getElementById('base-dec').value);
+            if (!dec && dec !== 0) {
+                document.getElementById('base-bin').textContent = '—';
+                document.getElementById('base-oct').textContent = '—';
+                document.getElementById('base-hex').textContent = '—';
+                return;
+            }
+
+            document.getElementById('base-bin').textContent = dec.toString(2);
+            document.getElementById('base-oct').textContent = dec.toString(8);
+            document.getElementById('base-hex').textContent = dec.toString(16).toUpperCase();
+        }
+
+        function convertFromOther() {
+            const input = document.getElementById('base-input').value.trim();
+            if (!input) return;
+
+            let dec;
+            // Try to detect format
+            if (input.startsWith('0x') || /^[0-9a-fA-F]+$/.test(input)) {
+                dec = parseInt(input, 16);
+            } else if (/^[01]+$/.test(input)) {
+                dec = parseInt(input, 2);
+            } else if (/^[0-7]+$/.test(input)) {
+                dec = parseInt(input, 8);
+            }
+
+            if (dec !== undefined && dec >= 0) {
+                document.getElementById('base-dec').value = dec;
+                convertBase();
+            }
+        }
+
+        // ===== CRON PARSER =====
+        function parseCron() {
+            const expr = document.getElementById('cron-input').value.trim();
+            const output = document.getElementById('cron-output');
+
+            if (!expr) {
+                output.innerHTML = 'Enter a cron expression';
+                return;
+            }
+
+            const parts = expr.split(/\s+/);
+            if (parts.length !== 5) {
+                output.innerHTML = '<div style="color: #dc2626;">Invalid format. Expected: minute hour day month weekday</div>';
+                return;
+            }
+
+            const [minute, hour, day, month, weekday] = parts;
+            let desc = '<div>';
+
+            // Minute
+            desc += parseCronField('Minute', minute, 0, 59);
+            desc += parseCronField('Hour', hour, 0, 23);
+            desc += parseCronField('Day', day, 1, 31);
+            desc += parseCronField('Month', month, 1, 12);
+            desc += parseCronField('Weekday', weekday, 0, 7, ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']);
+
+            desc += '</div>';
+            output.innerHTML = desc;
+        }
+
+        function parseCronField(label, field, min, max, names) {
+            const cron = field;
+            let meaning = '';
+
+            if (cron === '*') {
+                meaning = `Every ${label.toLowerCase()}`;
+            } else if (cron === '?') {
+                meaning = 'Any ' + label.toLowerCase();
+            } else if (cron.startsWith('*/')) {
+                const step = cron.slice(2);
+                meaning = `Every ${step} ${label.toLowerCase()}s`;
+            } else if (cron.includes(',')) {
+                const vals = cron.split(',');
+                meaning = `At ${label.toLowerCase()}(s): ${vals.join(', ')}`;
+            } else if (cron.includes('-')) {
+                const [start, end] = cron.split('-');
+                meaning = `From ${label.toLowerCase()} ${start} to ${end}`;
+            } else {
+                meaning = `At ${label.toLowerCase()} ${cron}`;
+            }
+
+            return `<div class="cron-field"><span class="cron-field-label">${label}:</span><span class="cron-field-value">${meaning}</span></div>`;
+        }
+
+        function setCronExample(expr) {
+            document.getElementById('cron-input').value = expr;
+            parseCron();
+        }
+
+        // Initialize
+        getCurrentTimestamp();
+    </script>
+</body>
+</html>

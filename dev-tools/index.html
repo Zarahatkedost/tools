@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Tools Studio</title>
+    <style>
+        :root {
+            --accent: #000000;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --border: #E5E7EB;
+            --bg-light: #F9FAFB;
+            --bg-white: #FFFFFF;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; background: var(--bg-white); color: var(--text-primary); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
+        .back-link { display: inline-block; margin-bottom: 1rem; color: var(--accent); text-decoration: none; font-size: 0.875rem; font-weight: 500; }
+        h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .explainer { background: var(--bg-light); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; }
+        .explainer h3 { font-size: 0.875rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .tab-container { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 2rem; overflow-x: auto; }
+        .tab-btn { flex: 1; min-width: 100px; padding: 1rem; background: none; border: none; border-bottom: 3px solid transparent; font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); cursor: pointer; white-space: nowrap; }
+        .tab-btn.active { color: var(--text-primary); border-bottom-color: var(--accent); }
+        .tool-section { display: none; }
+        .tool-section.active { display: block; }
+        .card { background: var(--bg-white); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .card-title { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; }
+        textarea, input { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-family: 'Courier New', monospace; font-size: 0.9rem; color: var(--text-primary); background: var(--bg-white); }
+        textarea:focus, input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+        textarea { resize: vertical; min-height: 120px; }
+        button { padding: 0.65rem 1.25rem; background: var(--accent); color: white; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        button:hover { opacity: 0.9; }
+        .btn-secondary { background: var(--bg-light); color: var(--text-primary); border: 1px solid var(--border); }
+        .flex-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .flex-col { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; min-width: 200px; }
+        .mt-1 { margin-top: 1rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-muted { color: var(--text-secondary); }
+        .output-box { background: var(--bg-light); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-top: 1rem; font-family: 'Courier New', monospace; font-size: 0.85rem; max-height: 250px; overflow-y: auto; word-break: break-all; }
+        .error { color: #DC2626; font-size: 0.9rem; margin-top: 0.5rem; }
+        .success { color: #16a34a; font-size: 0.9rem; margin-top: 0.5rem; }
+        .markdown-preview { background: var(--bg-white); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; margin-top: 1rem; }
+        .markdown-preview h1, .markdown-preview h2, .markdown-preview h3 { margin-top: 1rem; margin-bottom: 0.5rem; font-weight: 700; }
+        .markdown-preview h1 { font-size: 1.75rem; }
+        .markdown-preview h2 { font-size: 1.5rem; }
+        .markdown-preview h3 { font-size: 1.25rem; }
+        .markdown-preview p { margin-bottom: 1rem; line-height: 1.6; }
+        .markdown-preview code { background: var(--bg-light); padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.85rem; }
+        .markdown-preview pre { background: var(--bg-light); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1rem; }
+        .markdown-preview strong { font-weight: 700; }
+        .markdown-preview em { font-style: italic; }
+        .markdown-preview ul, .markdown-preview ol { margin-left: 2rem; margin-bottom: 1rem; }
+        .markdown-preview li { margin-bottom: 0.5rem; }
+        .diff-line { font-family: 'Courier New', monospace; font-size: 0.85rem; }
+        .diff-added { background: #dcfce7; color: #166534; padding: 0.25rem 0.5rem; margin: 2px 0; }
+        .diff-removed { background: #fee2e2; color: #991b1b; padding: 0.25rem 0.5rem; margin: 2px 0; }
+        .diff-neutral { padding: 0.25rem 0.5rem; margin: 2px 0; }
+        @media (max-width: 640px) { .container { padding: 1rem; } h1 { font-size: 1.5rem; } .tab-btn { min-width: 80px; font-size: 0.8rem; padding: 0.75rem; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Tools</a>
+        <h1>Dev Tools Studio</h1>
+        
+        <div class="explainer">
+            <h3>What This Does</h3>
+            <p>Four essential dev tools: JSON formatter & validator, regex pattern tester with matches, markdown preview, and text diff checker. All run locally in your browser.</p>
+        </div>
+
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchTab('json')">JSON</button>
+            <button class="tab-btn" onclick="switchTab('regex')">Regex</button>
+            <button class="tab-btn" onclick="switchTab('markdown')">Markdown</button>
+            <button class="tab-btn" onclick="switchTab('diff')">Diff</button>
+        </div>
+
+        <!-- JSON FORMATTER -->
+        <div id="json" class="tool-section active">
+            <div class="card">
+                <div class="card-title">JSON Formatter & Validator</div>
+                <div class="flex-col">
+                    <label class="text-sm text-muted">Paste JSON</label>
+                    <textarea id="json-input" placeholder='{"name": "value"}' oninput="formatJSON()"></textarea>
+                </div>
+
+                <div class="flex-row mt-1">
+                    <button onclick="formatJSON()">Format</button>
+                    <button onclick="minifyJSON()" class="btn-secondary">Minify</button>
+                    <button onclick="copyField('json-output')">Copy</button>
+                </div>
+
+                <div id="json-error" class="error" style="display: none;"></div>
+                <div id="json-success" class="success" style="display: none;"></div>
+
+                <div class="mt-1">
+                    <label class="text-sm text-muted">Formatted Output</label>
+                    <textarea id="json-output" readonly></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- REGEX TESTER -->
+        <div id="regex" class="tool-section">
+            <div class="card">
+                <div class="card-title">Regex Pattern Tester</div>
+                <div class="flex-row">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Pattern</label>
+                        <input type="text" id="regex-pattern" placeholder="/pattern/flags" oninput="testRegex()">
+                    </div>
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Flags (g, i, m)</label>
+                        <input type="text" id="regex-flags" placeholder="gi" value="g" oninput="testRegex()">
+                    </div>
+                </div>
+
+                <div class="flex-col mt-1">
+                    <label class="text-sm text-muted">Test String</label>
+                    <textarea id="regex-text" placeholder="Text to test against..." oninput="testRegex()"></textarea>
+                </div>
+
+                <div id="regex-error" class="error" style="display: none;"></div>
+
+                <div class="mt-1">
+                    <label class="text-sm text-muted">Matches</label>
+                    <div class="output-box" id="regex-output">— Results appear here —</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MARKDOWN PREVIEW -->
+        <div id="markdown" class="tool-section">
+            <div class="card">
+                <div class="card-title">Markdown Previewer</div>
+                <div class="flex-row">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Markdown Source</label>
+                        <textarea id="md-input" placeholder="# Heading&#10;&#10;**Bold** and *italic*..." oninput="renderMarkdown()"></textarea>
+                    </div>
+                </div>
+
+                <div class="mt-1">
+                    <label class="text-sm text-muted">Preview</label>
+                    <div class="markdown-preview" id="md-preview"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DIFF CHECKER -->
+        <div id="diff" class="tool-section">
+            <div class="card">
+                <div class="card-title">Text Diff Checker</div>
+                <div class="flex-row">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Original Text</label>
+                        <textarea id="diff-original" placeholder="Original text..."></textarea>
+                    </div>
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Modified Text</label>
+                        <textarea id="diff-modified" placeholder="Modified text..."></textarea>
+                    </div>
+                </div>
+
+                <button onclick="generateDiff()" class="mt-1">Show Diff</button>
+
+                <div class="mt-1">
+                    <label class="text-sm text-muted">Diff Output</label>
+                    <div class="output-box" id="diff-output"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tool-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function copyField(id) {
+            const val = document.getElementById(id).value;
+            navigator.clipboard.writeText(val).then(() => {
+                const btn = event.target;
+                const orig = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => btn.textContent = orig, 2000);
+            });
+        }
+
+        // ===== JSON =====
+        function formatJSON() {
+            const input = document.getElementById('json-input').value;
+            const errorDiv = document.getElementById('json-error');
+            const successDiv = document.getElementById('json-success');
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+
+            try {
+                const parsed = JSON.parse(input);
+                const formatted = JSON.stringify(parsed, null, 2);
+                document.getElementById('json-output').value = formatted;
+                successDiv.textContent = '✓ Valid JSON';
+                successDiv.style.display = 'block';
+            } catch (e) {
+                errorDiv.textContent = '✗ Invalid JSON: ' + e.message;
+                errorDiv.style.display = 'block';
+                document.getElementById('json-output').value = '';
+            }
+        }
+
+        function minifyJSON() {
+            const input = document.getElementById('json-input').value;
+            const errorDiv = document.getElementById('json-error');
+            const successDiv = document.getElementById('json-success');
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+
+            try {
+                const parsed = JSON.parse(input);
+                const minified = JSON.stringify(parsed);
+                document.getElementById('json-output').value = minified;
+                successDiv.textContent = '✓ Minified';
+                successDiv.style.display = 'block';
+            } catch (e) {
+                errorDiv.textContent = '✗ Invalid JSON: ' + e.message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        // ===== REGEX =====
+        function testRegex() {
+            const pattern = document.getElementById('regex-pattern').value;
+            const flags = document.getElementById('regex-flags').value;
+            const text = document.getElementById('regex-text').value;
+            const errorDiv = document.getElementById('regex-error');
+            const output = document.getElementById('regex-output');
+
+            errorDiv.style.display = 'none';
+
+            if (!pattern || !text) {
+                output.textContent = '— Enter pattern and text —';
+                return;
+            }
+
+            try {
+                const regex = new RegExp(pattern, flags);
+                const matches = text.match(regex);
+
+                if (!matches) {
+                    output.textContent = 'No matches found';
+                } else {
+                    output.innerHTML = matches.map((m, i) => `<div>Match ${i + 1}: <strong>${escapeHtml(m)}</strong></div>`).join('');
+                }
+            } catch (e) {
+                errorDiv.textContent = '✗ Invalid regex: ' + e.message;
+                errorDiv.style.display = 'block';
+                output.textContent = '';
+            }
+        }
+
+        // ===== MARKDOWN =====
+        function renderMarkdown() {
+            const input = document.getElementById('md-input').value;
+            let html = input
+                .replace(/^### (.*?)$/gm, '<h3>$1</h3>')
+                .replace(/^## (.*?)$/gm, '<h2>$1</h2>')
+                .replace(/^# (.*?)$/gm, '<h1>$1</h1>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                .replace(/`(.+?)`/g, '<code>$1</code>')
+                .replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>')
+                .replace(/\n\n+/g, '</p><p>')
+                .replace(/^- (.*?)$/gm, '<li>$1</li>')
+                .replace(/(<li>.*?<\/li>)/s, '<ul>$1</ul>')
+                .replace(/\n/g, '<br>');
+            
+            document.getElementById('md-preview').innerHTML = html;
+        }
+
+        // ===== DIFF =====
+        function generateDiff() {
+            const orig = document.getElementById('diff-original').value.split('\n');
+            const mod = document.getElementById('diff-modified').value.split('\n');
+            let diffHtml = '';
+
+            const maxLen = Math.max(orig.length, mod.length);
+            for (let i = 0; i < maxLen; i++) {
+                const origLine = orig[i] || '';
+                const modLine = mod[i] || '';
+
+                if (origLine === modLine) {
+                    diffHtml += `<div class="diff-line diff-neutral">${escapeHtml(origLine)}</div>`;
+                } else {
+                    if (origLine) diffHtml += `<div class="diff-line diff-removed">- ${escapeHtml(origLine)}</div>`;
+                    if (modLine) diffHtml += `<div class="diff-line diff-added">+ ${escapeHtml(modLine)}</div>`;
+                }
+            }
+
+            document.getElementById('diff-output').innerHTML = diffHtml || 'No differences';
+        }
+
+        // ===== UTILITY =====
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        renderMarkdown();
+    </script>
+</body>
+</html>

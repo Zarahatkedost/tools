@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact card maker · Sahil's tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+  :root{
+    --paper:#F5F2EC; --ink:#1C1B19; --line:#DEDACF; --line2:#CBC6B8;
+    --accent:#1F4FD8; --accent-ink:#15379a; --muted:#6E6A60; --card:#FCFAF6;
+    --ok:#1D7D53; --warn:#B4611A; --danger:#B23B2E;
+    --radius:12px; --ctrl:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1020px;margin:0 auto;padding:20px 20px 64px;}
+  header.site{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 22px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;letter-spacing:-0.01em;}
+  .brand .mark{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;}
+  .brand a{color:inherit;text-decoration:none;}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ok);font-weight:500;}
+  .privacy svg{width:15px;height:15px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);text-decoration:none;margin-bottom:14px;}
+  .back:hover{color:var(--ink);}
+  .back svg{width:15px;height:15px;}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,44px);line-height:1.03;letter-spacing:-0.02em;margin:0 0 6px;}
+  .sub{font-size:15px;color:var(--muted);margin:0 0 26px;max-width:54ch;}
+  .grid{display:grid;grid-template-columns:1fr 300px;gap:26px;align-items:start;}
+  @media(max-width:760px){.grid{grid-template-columns:1fr;}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
+  .field{margin-bottom:16px;}
+  .field:last-child{margin-bottom:0;}
+  label.lbl{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-bottom:6px;letter-spacing:0.01em;}
+  input[type=text],textarea{width:100%;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:var(--ctrl);padding:10px 12px;transition:border-color .15s,box-shadow .15s;}
+  input[type=text]:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(31,79,216,0.12);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:420px){.row2{grid-template-columns:1fr;}}
+  .sectlbl{font-size:12.5px;font-weight:600;margin:0 0 10px;color:var(--ink);}
+  .divider{border-top:1px solid var(--line);margin:18px 0;}
+  .linkrow{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .linkrow .tag{width:96px;flex-shrink:0;font-size:12.5px;}
+  .linkrow input.tag{padding:8px 10px;}
+  .linkrow .lbltag{display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-weight:500;}
+  .linkrow .lbltag svg{width:15px;height:15px;}
+  .linkrow input.url{flex:1;font-size:12.5px;padding:8px 10px;}
+  .xbtn{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;display:grid;place-items:center;border-radius:6px;}
+  .xbtn:hover{color:var(--danger);background:#f4ece9;}
+  .xbtn svg{width:15px;height:15px;}
+  .addlink{display:inline-flex;align-items:center;gap:7px;font-family:'Inter';font-size:13px;font-weight:500;color:var(--ink);background:#fff;border:1px dashed var(--line2);border-radius:var(--ctrl);padding:9px 14px;cursor:pointer;}
+  .addlink:hover{background:#F3EFE6;}
+  .addlink svg{width:15px;height:15px;}
+  .preview{position:sticky;top:16px;}
+  .qrbox{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .qrstage{width:200px;height:200px;background:#fff;border-radius:10px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:10px;}
+  #qrcanvas{width:100%;height:100%;image-rendering:pixelated;}
+  .who{text-align:center;}
+  .who .nm{font-weight:600;font-size:15px;}
+  .who .ti{font-size:12.5px;color:var(--muted);}
+  .dlrow{display:flex;flex-direction:column;gap:8px;width:100%;}
+  .btn{font-family:'Inter';font-size:13.5px;font-weight:500;padding:10px 14px;border-radius:var(--ctrl);cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:all .15s;width:100%;}
+  .btn:hover{background:#F3EFE6;}
+  .btn svg{width:16px;height:16px;}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .btn.primary:hover{background:var(--accent-ink);}
+  .copied{font-size:12px;color:var(--ok);text-align:center;height:14px;font-weight:500;}
+  .foot{margin-top:34px;font-size:12.5px;color:var(--muted);text-align:center;}
+
+  /* ---- SAVE VIEW ---- */
+  .saveview{max-width:400px;margin:6vh auto 0;padding:0 20px;}
+  .savecard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px 24px;text-align:center;}
+  .avatar{width:76px;height:76px;border-radius:50%;background:#E7ECFB;color:var(--accent);display:grid;place-items:center;font-weight:600;font-size:26px;margin:0 auto 12px;font-family:'Fraunces',serif;}
+  .savecard .nm{font-family:'Fraunces',serif;font-weight:600;font-size:24px;line-height:1.1;}
+  .savecard .ti{font-size:14px;color:var(--muted);margin-top:3px;}
+  .detail{border-top:1px solid var(--line);margin-top:18px;padding-top:16px;text-align:left;display:flex;flex-direction:column;gap:11px;}
+  .detail a,.detail span{display:flex;align-items:center;gap:11px;font-size:14px;color:var(--ink);text-decoration:none;}
+  .detail svg{width:17px;height:17px;color:var(--muted);flex-shrink:0;}
+  .detail a:hover{color:var(--accent);}
+  .savebtn{margin-top:20px;}
+</style>
+</head>
+<body>
+
+<!-- ============ MAKER VIEW ============ -->
+<div class="wrap" id="makerView">
+  <header class="site">
+    <div class="brand"><span class="mark">S</span><a href="/">sahil's tools</a></div>
+    <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>100% private — nothing leaves your device</span>
+  </header>
+  <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>All tools</a>
+  <h1>Contact card maker</h1>
+  <p class="sub">Fill in your details, add any links you like, and share a card people can save in one tap — plus a QR and a downloadable contact file.</p>
+
+  <div class="grid">
+    <div class="panel">
+      <div class="row2">
+        <div class="field"><label class="lbl">First name</label><input type="text" id="f_first" value=""></div>
+        <div class="field"><label class="lbl">Last name</label><input type="text" id="f_last" value=""></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label class="lbl">Company</label><input type="text" id="f_org" value=""></div>
+        <div class="field"><label class="lbl">Job title</label><input type="text" id="f_title" value=""></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label class="lbl">Mobile</label><input type="text" id="f_mobile" value=""></div>
+        <div class="field"><label class="lbl">Landline</label><input type="text" id="f_landline" value=""></div>
+      </div>
+      <div class="field"><label class="lbl">Email</label><input type="text" id="f_email" value=""></div>
+      <div class="field"><label class="lbl">Website</label><input type="text" id="f_web" value=""></div>
+      <div class="field"><label class="lbl">Address</label><input type="text" id="f_addr" value=""></div>
+
+      <div class="divider"></div>
+      <p class="sectlbl">Links</p>
+      <div id="linkList"></div>
+      <button class="addlink" id="addLink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add link (X, WhatsApp, Calendly…)</button>
+    </div>
+
+    <div class="preview">
+      <div class="qrbox">
+        <div class="qrstage"><canvas id="qrcanvas" width="800" height="800"></canvas></div>
+        <div class="who"><div class="nm" id="pv_name">Your name</div><div class="ti" id="pv_title"></div></div>
+        <div class="dlrow">
+          <button class="btn primary" id="dlvcf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Download .vcf</button>
+          <button class="btn" id="dlqr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M20 20v.01M17 20h.01M20 17h.01"/></svg>Download QR</button>
+          <button class="btn" id="copyShare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Copy "save me" link</button>
+          <button class="btn" id="copyDirect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Copy direct-download link</button>
+        </div>
+        <div class="copied" id="copied"></div>
+      </div>
+    </div>
+  </div>
+  <p class="foot">Made for sahilshaikh.org · runs entirely in your browser</p>
+</div>
+
+<!-- ============ SAVE VIEW ============ -->
+<div class="saveview" id="saveView" style="display:none;">
+  <div class="savecard">
+    <div class="avatar" id="sv_avatar">?</div>
+    <div class="nm" id="sv_name">Contact</div>
+    <div class="ti" id="sv_title"></div>
+    <div class="detail" id="sv_detail"></div>
+    <button class="btn primary savebtn" id="sv_save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>Save to contacts</button>
+  </div>
+  <p class="foot"><a href="?" style="color:var(--accent);text-decoration:none;">Make your own contact card →</a></p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+
+  // ---------- shared: build vCard ----------
+  function buildVCard(d){
+    var L=["BEGIN:VCARD","VERSION:3.0"];
+    var fn=((d.first||"")+" "+(d.last||"")).trim();
+    L.push("N:"+(d.last||"")+";"+(d.first||"")+";;;");
+    L.push("FN:"+(fn||"Contact"));
+    if(d.org) L.push("ORG:"+d.org);
+    if(d.title) L.push("TITLE:"+d.title);
+    if(d.mobile) L.push("TEL;TYPE=CELL:"+d.mobile);
+    if(d.landline) L.push("TEL;TYPE=WORK,VOICE:"+d.landline);
+    if(d.email) L.push("EMAIL;TYPE=INTERNET:"+d.email);
+    if(d.web) L.push("URL:"+normUrl(d.web));
+    if(d.addr) L.push("ADR;TYPE=WORK:;;"+d.addr.replace(/,/g,"\\,")+";;;;");
+    (d.links||[]).forEach(function(lk){
+      if(lk.url){ L.push("URL:"+normUrl(lk.url)); }
+    });
+    L.push("END:VCARD");
+    return L.join("\r\n");
+  }
+  function normUrl(u){ u=(u||"").trim(); if(!u) return u; if(!/^https?:\/\//i.test(u) && !/^mailto:/i.test(u)){ if(u.indexOf("@")>-1 && u.indexOf(".")>-1 && u.indexOf(" ")<0) return u; return "https://"+u.replace(/^\/+/,""); } return u; }
+  function initials(d){ var a=(d.first||"").charAt(0), b=(d.last||"").charAt(0); return (a+b).toUpperCase()||"?"; }
+
+  // ---------- unicode-safe base64 ----------
+  function enc(obj){ return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+  function dec(str){ try{ str=str.replace(/-/g,"+").replace(/_/g,"/"); return JSON.parse(decodeURIComponent(escape(atob(str)))); }catch(e){ return null; } }
+
+  // =====================================================
+  // SAVE VIEW  (when opened via share link  #c=... or #d=...)
+  // =====================================================
+  var hash=location.hash||"";
+  var mShare=hash.match(/[#&]c=([^&]+)/);
+  var mDirect=hash.match(/[#&]d=([^&]+)/);
+  if(mShare || mDirect){
+    var data=dec((mShare?mShare[1]:mDirect[1]));
+    if(data){
+      $("makerView").style.display="none";
+      $("saveView").style.display="block";
+      var vcf=buildVCard(data);
+      var doDownload=function(){
+        var blob=new Blob([vcf],{type:"text/vcard;charset=utf-8"});
+        var a=document.createElement("a");
+        a.download=((data.first||"contact")+"-"+(data.last||"")).replace(/\s+/g,"")+".vcf";
+        a.href=URL.createObjectURL(blob); a.click();
+        setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+      };
+      // populate card
+      $("sv_avatar").textContent=initials(data);
+      $("sv_name").textContent=((data.first||"")+" "+(data.last||"")).trim()||"Contact";
+      var tline=[data.title,data.org].filter(Boolean).join(" · ");
+      $("sv_title").textContent=tline;
+      var det=$("sv_detail"); det.innerHTML="";
+      function line(icon,text,href){
+        var el=document.createElement(href?"a":"span");
+        if(href) el.href=href;
+        el.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'+icon+'</svg><span>'+text+'</span>';
+        det.appendChild(el);
+      }
+      if(data.mobile) line('<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7l.7 3a2 2 0 0 1-.5 1.9L8 10a16 16 0 0 0 6 6l1.4-1.3a2 2 0 0 1 1.9-.5l3 .7a2 2 0 0 1 1.7 2z"/>', data.mobile, "tel:"+data.mobile);
+      if(data.landline) line('<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7l.7 3a2 2 0 0 1-.5 1.9L8 10a16 16 0 0 0 6 6l1.4-1.3a2 2 0 0 1 1.9-.5l3 .7a2 2 0 0 1 1.7 2z"/>', data.landline, "tel:"+data.landline);
+      if(data.email) line('<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/>', data.email, "mailto:"+data.email);
+      if(data.web) line('<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/>', data.web, normUrl(data.web));
+      if(data.addr) line('<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>', data.addr, null);
+      (data.links||[]).forEach(function(lk){
+        if(lk.url) line('<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>', lk.label||lk.url, normUrl(lk.url));
+      });
+      $("sv_save").addEventListener("click",doDownload);
+      if(mDirect){ setTimeout(doDownload,300); }  // direct link auto-downloads
+      return; // stop — don't run maker
+    }
+  }
+
+  // =====================================================
+  // MAKER VIEW
+  // =====================================================
+  var canvas=$("qrcanvas"), ctx=canvas.getContext("2d");
+  var links=[
+    {label:"LinkedIn", url:"", icon:"linkedin"},
+    {label:"Instagram", url:"", icon:"instagram"}
+  ];
+
+  var ICONS={
+    linkedin:'<path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>',
+    instagram:'<rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/>'
+  };
+
+  function renderLinks(){
+    var host=$("linkList"); host.innerHTML="";
+    links.forEach(function(lk,i){
+      var row=document.createElement("div"); row.className="linkrow";
+      var tag;
+      if(lk.icon){
+        tag='<span class="tag lbltag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'+ICONS[lk.icon]+'</svg>'+lk.label+'</span>';
+      } else {
+        tag='<input class="tag url" type="text" placeholder="Label" value="'+escAttr(lk.label)+'" data-i="'+i+'" data-k="label">';
+      }
+      row.innerHTML=tag+'<input class="url" type="text" placeholder="'+(lk.icon==="instagram"?"@handle or link":"paste link")+'" value="'+escAttr(lk.url)+'" data-i="'+i+'" data-k="url"><button class="xbtn" data-del="'+i+'" aria-label="remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>';
+      host.appendChild(row);
+    });
+    host.querySelectorAll("input").forEach(function(inp){
+      inp.addEventListener("input",function(){ links[+this.dataset.i][this.dataset.k]=this.value; render(); });
+    });
+    host.querySelectorAll("[data-del]").forEach(function(b){
+      b.addEventListener("click",function(){ links.splice(+this.dataset.del,1); renderLinks(); render(); });
+    });
+  }
+  function escAttr(s){return (s||"").replace(/"/g,"&quot;");}
+
+  $("addLink").addEventListener("click",function(){ links.push({label:"",url:""}); renderLinks(); render(); });
+
+  function gather(){
+    return {
+      first:$("f_first").value.trim(), last:$("f_last").value.trim(),
+      org:$("f_org").value.trim(), title:$("f_title").value.trim(),
+      mobile:$("f_mobile").value.trim(), landline:$("f_landline").value.trim(),
+      email:$("f_email").value.trim(), web:$("f_web").value.trim(),
+      addr:$("f_addr").value.trim(),
+      links:links.filter(function(l){return l.url.trim();}).map(function(l){return {label:l.label.trim(),url:l.url.trim()};})
+    };
+  }
+
+  function drawQR(text){
+    var qr;
+    for(var t=0;t<=40;t++){ try{ qr=qrcode(t,"M"); qr.addData(text||" "); qr.make(); break; }catch(e){ qr=null; } }
+    if(!qr) return;
+    var n=qr.getModuleCount(), quiet=4, total=n+quiet*2, SIZE=800, cell=SIZE/total;
+    canvas.width=SIZE; canvas.height=SIZE;
+    ctx.fillStyle="#fff"; ctx.fillRect(0,0,SIZE,SIZE);
+    ctx.fillStyle="#1C1B19";
+    for(var r=0;r<n;r++)for(var c=0;c<n;c++){ if(qr.isDark(r,c)) ctx.fillRect(Math.floor((c+quiet)*cell),Math.floor((r+quiet)*cell),Math.ceil(cell),Math.ceil(cell)); }
+  }
+
+  function render(){
+    var d=gather();
+    var nm=((d.first||"")+" "+(d.last||"")).trim();
+    $("pv_name").textContent=nm||"Your name";
+    $("pv_title").textContent=[d.title,d.org].filter(Boolean).join(" · ");
+    // QR encodes the vCard itself → scanning adds contact directly, works offline
+    drawQR(buildVCard(d));
+  }
+
+  // downloads / share
+  $("dlvcf").addEventListener("click",function(){
+    var d=gather(); var blob=new Blob([buildVCard(d)],{type:"text/vcard;charset=utf-8"});
+    var a=document.createElement("a"); a.download=((d.first||"contact")+"-"+(d.last||"")).replace(/\s+/g,"")+".vcf";
+    a.href=URL.createObjectURL(blob); a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+  });
+  $("dlqr").addEventListener("click",function(){
+    var a=document.createElement("a"); a.download="contact-qr.png"; a.href=canvas.toDataURL("image/png"); a.click();
+  });
+  function baseUrl(){ return location.origin+location.pathname; }
+  function flash(msg){ var c=$("copied"); c.textContent=msg; setTimeout(function(){c.textContent="";},2200); }
+  function copy(text,msg){
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(function(){flash(msg);},function(){prompt("Copy this link:",text);}); }
+    else { prompt("Copy this link:",text); }
+  }
+  $("copyShare").addEventListener("click",function(){ copy(baseUrl()+"#c="+enc(gather()), "Share link copied"); });
+  $("copyDirect").addEventListener("click",function(){ copy(baseUrl()+"#d="+enc(gather()), "Direct-download link copied"); });
+
+  renderLinks();
+  ["f_first","f_last","f_org","f_title","f_mobile","f_landline","f_email","f_web","f_addr"].forEach(function(id){
+    $(id).addEventListener("input",render);
+  });
+  render();
+})();
+</script>
+</body>
+</html>

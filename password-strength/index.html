@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Password strength · Sahil's tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#FFFFFF;--ink:#0A0A0A;--line:#E4E4E4;--line2:#CFCFCF;--muted:#6B6B6B;--card:#FAFAFA;--radius:12px;--ctrl:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:680px;margin:0 auto;padding:20px 20px 64px;}
+  header.site{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 22px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;}
+  .brand .mark{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;}
+  .brand a{color:inherit;text-decoration:none;}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);font-weight:500;}.privacy svg{width:15px;height:15px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);text-decoration:none;margin-bottom:14px;}.back svg{width:15px;height:15px;}.back:hover{color:var(--ink);}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,44px);letter-spacing:-0.02em;margin:0 0 6px;}
+  .sub{font-size:15px;color:var(--muted);margin:0 0 20px;}
+  .about{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:22px;font-size:13.5px;color:var(--muted);}
+  .about b{color:var(--ink);font-weight:600;}
+  .pwbox{display:flex;gap:10px;}
+  input[type=password],input[type=text]{flex:1;font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:var(--ctrl);padding:13px 14px;}
+  input:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(10,10,10,0.07);}
+  .btn{font-family:'Inter';font-size:13.5px;font-weight:500;padding:10px 14px;border-radius:var(--ctrl);cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink);}
+  .btn:hover{background:#F0F0F0;}
+  .meter{height:10px;background:var(--line);border-radius:6px;margin:18px 0 8px;overflow:hidden;}
+  .meter .fill{height:100%;width:0%;border-radius:6px;transition:all .25s;}
+  .verdict{font-family:'Fraunces',serif;font-weight:600;font-size:22px;margin-bottom:2px;}
+  .crack{font-size:13.5px;color:var(--muted);margin-bottom:18px;}
+  .crack b{color:var(--ink);font-family:'JetBrains Mono',monospace;}
+  .facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+  @media(max-width:520px){.facts{grid-template-columns:1fr;}}
+  .fact{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;font-size:12.5px;color:var(--muted);}
+  .fact b{display:block;font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--ink);}
+  ul.checks{list-style:none;}
+  ul.checks li{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;padding:5px 0;}
+  ul.checks li svg{width:16px;height:16px;flex-shrink:0;margin-top:2px;}
+  li.pass{color:var(--muted);}
+  li.fail{color:var(--ink);font-weight:500;}
+  .foot{margin-top:34px;font-size:12.5px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <div class="brand"><span class="mark">S</span><a href="/">sahil's tools</a></div>
+    <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Runs in your browser</span>
+  </header>
+  <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>All tools</a>
+
+  <h1>Password strength</h1>
+  <p class="sub">Type a password and see how long it would survive a cracking attempt.</p>
+
+  <div class="about">
+    <b>What this does.</b> Estimates how strong a password is using its length and character variety (its <b>entropy</b>), shows an estimated crack time against a modern offline attack (~10 billion guesses/second), and lists exactly what would make it stronger. It also catches the classic weaknesses: common passwords, keyboard runs like <b>qwerty</b>, repeated characters and sequences. <b>Your password never leaves this page</b> — nothing is sent, stored, or logged anywhere. Still, never test your real current password anywhere, even here — test candidates instead. Need a strong one generated? Use the Crypto &amp; ID tool.
+  </div>
+
+  <div class="pwbox">
+    <input type="password" id="pw" placeholder="Type a password…" autocomplete="off">
+    <button class="btn" id="show">Show</button>
+  </div>
+
+  <div class="meter"><div class="fill" id="fill"></div></div>
+  <div class="verdict" id="verdict">—</div>
+  <div class="crack" id="crack">Crack time appears here.</div>
+
+  <div class="facts">
+    <div class="fact"><b id="fLen">0</b>characters</div>
+    <div class="fact"><b id="fPool">0</b>character pool size</div>
+    <div class="fact"><b id="fEnt">0 bits</b>entropy (approx.)</div>
+    <div class="fact"><b id="fVar">—</b>character types used</div>
+  </div>
+
+  <ul class="checks" id="checks"></ul>
+
+  <p class="foot">Made for sahilshaikh.org · runs entirely in your browser</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+
+  /* ---- tiny list of the most common passwords (top offenders) ---- */
+  var COMMON=["password","123456","1234567","12345678","123456789","1234567890","qwerty","abc123","password1","admin","letmein","welcome","monkey","iloveyou","dragon","111111","123123","000000","qwerty123","1q2w3e4r","sunshine","princess","football","baseball","superman","batman","trustno1","master","hello123","freedom","whatever","qazwsx","password123","passw0rd","p@ssw0rd","admin123","root","toor","pass","test","guest","qatar123","doha123"];
+  var KEYS=["qwertyuiop","asdfghjkl","zxcvbnm","1234567890","0987654321","poiuytrewq","lkjhgfdsa","mnbvcxz"];
+
+  /* ============================================================
+     ENTROPY = length × log2(pool size)
+     pool = 26 lower + 26 upper + 10 digits + 32 symbols (whichever appear)
+     Crack time = 2^entropy ÷ 2 ÷ guesses-per-second (average case)
+     ============================================================ */
+  function analyze(pw){
+    var pool=0;
+    var hasL=/[a-z]/.test(pw), hasU=/[A-Z]/.test(pw), hasD=/[0-9]/.test(pw), hasS=/[^a-zA-Z0-9]/.test(pw);
+    if(hasL)pool+=26; if(hasU)pool+=26; if(hasD)pool+=10; if(hasS)pool+=32;
+    var entropy = pw.length ? pw.length * Math.log2(pool||1) : 0;
+
+    /* penalties: common password, keyboard runs, repeats, sequences */
+    var lower=pw.toLowerCase();
+    var isCommon = COMMON.indexOf(lower)!==-1;
+    var hasKeyRun = KEYS.some(function(k){
+      for(var i=0;i+4<=k.length;i++) if(lower.indexOf(k.slice(i,i+4))!==-1) return true;
+      return false;
+    });
+    var hasRepeat = /(.)\1{2,}/.test(pw); // aaa, 111
+    var hasSeq = (function(){
+      for(var i=0;i+3<=lower.length;i++){
+        var a=lower.charCodeAt(i), b=lower.charCodeAt(i+1), c=lower.charCodeAt(i+2);
+        if(b===a+1 && c===b+1) return true; // abc, 123
+      }
+      return false;
+    })();
+
+    var eff=entropy;
+    if(isCommon) eff=Math.min(eff,10);       // effectively instant
+    if(hasKeyRun) eff-=15;
+    if(hasRepeat) eff-=8;
+    if(hasSeq) eff-=8;
+    eff=Math.max(0,eff);
+
+    return {pool:pool,entropy:entropy,eff:eff,
+            hasL:hasL,hasU:hasU,hasD:hasD,hasS:hasS,
+            isCommon:isCommon,hasKeyRun:hasKeyRun,hasRepeat:hasRepeat,hasSeq:hasSeq};
+  }
+
+  function crackTime(bits){
+    var guessesPerSec=1e10;                          // strong offline rig
+    var seconds=Math.pow(2,bits)/2/guessesPerSec;    // average = half keyspace
+    if(seconds<1) return "instantly";
+    var units=[["years",31557600],["days",86400],["hours",3600],["minutes",60],["seconds",1]];
+    for(var i=0;i<units.length;i++){
+      var v=seconds/units[i][1];
+      if(v>=1){
+        if(units[i][0]==="years"){
+          if(v>1e12) return "longer than the age of the universe";
+          if(v>1e6)  return Math.round(v/1e6).toLocaleString()+" million years";
+          if(v>1000) return Math.round(v/1000).toLocaleString()+" thousand years";
+        }
+        return Math.round(v).toLocaleString()+" "+units[i][0];
+      }
+    }
+    return "instantly";
+  }
+
+  function render(){
+    var pw=$("pw").value;
+    var a=analyze(pw);
+    var kinds=[a.hasL&&"lower",a.hasU&&"UPPER",a.hasD&&"digits",a.hasS&&"symbols"].filter(Boolean);
+
+    $("fLen").textContent=pw.length;
+    $("fPool").textContent=a.pool;
+    $("fEnt").textContent=Math.round(a.eff)+" bits";
+    $("fVar").textContent=kinds.length?kinds.join(" + "):"—";
+
+    /* verdict bands on effective entropy */
+    var pct,label,color;
+    if(!pw){pct=0;label="—";color="var(--line)";}
+    else if(a.eff<28){pct=15;label="Very weak";color="#B23B2E";}
+    else if(a.eff<40){pct=35;label="Weak";color="#C96A2B";}
+    else if(a.eff<60){pct=60;label="Fair";color="#8A6D00";}
+    else if(a.eff<80){pct=80;label="Strong";color="#3C7A3F";}
+    else{pct=100;label="Very strong";color="#1D7D53";}
+    $("fill").style.width=pct+"%"; $("fill").style.background=color;
+    $("verdict").textContent=label; $("verdict").style.color=pw?color:"var(--ink)";
+    $("crack").innerHTML=pw?("Estimated offline crack time: <b>"+crackTime(a.eff)+"</b>"):"Crack time appears here.";
+
+    /* checklist */
+    var items=[
+      [pw.length>=12,"At least 12 characters ("+pw.length+")"],
+      [a.hasU&&a.hasL,"Mix of UPPER and lower case"],
+      [a.hasD,"Contains digits"],
+      [a.hasS,"Contains symbols (!@#…)"],
+      [!a.isCommon, a.isCommon?"This is one of the most common passwords — never use it":"Not a commonly used password"],
+      [!a.hasKeyRun, a.hasKeyRun?"Contains a keyboard run (qwerty / 1234…)":"No keyboard runs"],
+      [!a.hasRepeat, a.hasRepeat?"Has repeated characters (aaa / 111)":"No repeated characters"],
+      [!a.hasSeq, a.hasSeq?"Has sequences (abc / 123)":"No sequences"]
+    ];
+    var html="";
+    items.forEach(function(it){
+      var ok=it[0];
+      html+='<li class="'+(ok?"pass":"fail")+'">'+
+        (ok?'<svg viewBox="0 0 24 24" fill="none" stroke="#1D7D53" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>'
+           :'<svg viewBox="0 0 24 24" fill="none" stroke="#B23B2E" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>')+
+        '<span>'+it[1]+'</span></li>';
+    });
+    $("checks").innerHTML=pw?html:"";
+  }
+
+  $("pw").addEventListener("input",render);
+  $("show").onclick=function(){
+    var i=$("pw");
+    i.type = i.type==="password" ? "text" : "password";
+    this.textContent = i.type==="password" ? "Show" : "Hide";
+  };
+  render();
+})();
+</script>
+</body>
+</html>

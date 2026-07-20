@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Petty cash tracker · Sahil's tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     THEME — pure black & white, one tiny accent (shared across tools)
+     ============================================================ */
+  :root{
+    --bg:#FFFFFF; --ink:#0A0A0A; --line:#E4E4E4; --line2:#CFCFCF;
+    --muted:#6B6B6B; --card:#FAFAFA; --accent:#0A0A0A; --on-accent:#FFFFFF;
+    --ok:#1D7D53; --danger:#B23B2E; --radius:12px; --ctrl:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1000px;margin:0 auto;padding:20px 20px 64px;}
+  header.site{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 22px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;}
+  .brand .mark{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;}
+  .brand a{color:inherit;text-decoration:none;}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);font-weight:500;}.privacy svg{width:15px;height:15px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);text-decoration:none;margin-bottom:14px;}.back svg{width:15px;height:15px;}.back:hover{color:var(--ink);}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,44px);letter-spacing:-0.02em;margin:0 0 6px;}
+  .sub{font-size:15px;color:var(--muted);margin:0 0 20px;}
+  .about{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:22px;font-size:13.5px;color:var(--muted);}
+  .about b{color:var(--ink);font-weight:600;}
+
+  .topbar{display:flex;gap:14px;flex-wrap:wrap;align-items:end;margin-bottom:18px;}
+  .fieldlet{display:flex;flex-direction:column;gap:5px;}
+  label.lbl{font-size:11.5px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:0.03em;}
+  input,select{font-family:'Inter';font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:var(--ctrl);padding:9px 11px;transition:border-color .15s,box-shadow .15s;}
+  input:focus,select:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(10,10,10,0.07);}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:0;overflow:hidden;}
+  .tablescroll{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:820px;}
+  th{text-align:left;font-weight:500;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.03em;padding:10px 8px;border-bottom:1px solid var(--line);background:#fff;white-space:nowrap;}
+  td{padding:5px 6px;border-bottom:1px solid var(--line);}
+  td input,td select{width:100%;min-width:70px;padding:7px 8px;border:1px solid transparent;background:transparent;border-radius:7px;font-size:13px;}
+  td input:hover,td select:hover{border-color:var(--line);}
+  td input:focus,td select:focus{background:#fff;border-color:var(--ink);}
+  td.amt input{text-align:right;font-family:'JetBrains Mono',monospace;}
+  .delrow{background:none;border:none;cursor:pointer;color:var(--muted);padding:5px;border-radius:6px;}
+  .delrow:hover{color:var(--danger);background:#f4ece9;}
+  .delrow svg{width:15px;height:15px;display:block;}
+
+  .actions{display:flex;gap:8px;flex-wrap:wrap;padding:14px;background:#fff;border-top:1px solid var(--line);}
+  .btn{font-family:'Inter';font-size:13.5px;font-weight:500;padding:9px 14px;border-radius:var(--ctrl);cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:all .15s;}
+  .btn:hover{background:#F0F0F0;}
+  .btn.dark{background:var(--ink);color:#fff;border-color:var(--ink);}.btn.dark:hover{opacity:.88;}
+  .btn svg{width:15px;height:15px;}
+
+  .totals{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:18px;}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--ctrl);padding:16px;text-align:center;}
+  .stat .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.03em;}
+  .stat .v{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500;margin-top:5px;}
+  .stat.hl{background:var(--ink);color:#fff;}.stat.hl .k{color:#bbb;}
+  .stat.neg .v{color:var(--danger);}
+
+  .foot{margin-top:34px;font-size:12.5px;color:var(--muted);text-align:center;}
+
+  /* print: show only the table + totals, clean B/W */
+  @media print{
+    .no-print{display:none !important;}
+    body{background:#fff;}
+    .panel{border:none;}
+    td input,td select{border:none;background:transparent;}
+    th{border-bottom:1px solid #000;}
+    td{border-bottom:1px solid #ccc;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site no-print">
+    <div class="brand"><span class="mark">S</span><a href="/">sahil's tools</a></div>
+    <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Stays on your device</span>
+  </header>
+  <a class="back no-print" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>All tools</a>
+
+  <h1>Petty cash tracker</h1>
+  <p class="sub">Log expenses, track the remaining balance, and export to Excel or PDF.</p>
+
+  <div class="about no-print">
+    <b>What this does.</b> Record each petty-cash expense — date, what it was for, amount, who paid, who received it, invoice number, and category. It keeps a running total of what's been spent and how much of your starting cash <b>float</b> remains. When you're done, export a <b>CSV</b> (opens in Excel) or use <b>Print</b> to save a PDF. <b>Important:</b> entries live in this browser only and are <b>not saved automatically</b> — export before you close the tab, and re-import isn't supported, so treat the exported file as your record.
+  </div>
+
+  <div class="topbar no-print">
+    <div class="fieldlet">
+      <label class="lbl">Currency</label>
+      <select id="currency">
+        <option>QAR</option><option>USD</option><option>EUR</option><option>GBP</option><option>AED</option><option>INR</option><option>SAR</option>
+      </select>
+    </div>
+    <div class="fieldlet">
+      <label class="lbl">Starting float (cash in)</label>
+      <input type="number" id="float" value="5000" style="width:150px;">
+    </div>
+    <div class="fieldlet">
+      <label class="lbl">Fund / period name</label>
+      <input type="text" id="fundName" placeholder="e.g. July petty cash" style="width:200px;">
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="tablescroll">
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th style="text-align:right;">Amount</th>
+            <th>Paid by</th>
+            <th>Paid to</th>
+            <th>Invoice #</th>
+            <th>Category</th>
+            <th class="no-print"></th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="actions no-print">
+      <button class="btn" id="addRow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add expense</button>
+      <button class="btn" id="exportCsv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export CSV</button>
+      <button class="btn" id="printBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>Print / PDF</button>
+    </div>
+  </div>
+
+  <div class="totals">
+    <div class="stat"><div class="k">Entries</div><div class="v" id="tCount">0</div></div>
+    <div class="stat"><div class="k">Total spent</div><div class="v" id="tSpent">0</div></div>
+    <div class="stat hl" id="balCard"><div class="k">Remaining balance</div><div class="v" id="tBalance">0</div></div>
+  </div>
+
+  <p class="foot">Made for sahilshaikh.org · runs entirely in your browser</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+
+  /* ============================================================
+     DATA — each expense is one row object.
+     ============================================================ */
+  var CATEGORIES=["General","Travel","Meals","Office","Supplies","Fuel","Courier","Repairs","Fees","Other"];
+  var rows=[];
+
+  function todayStr(){ return new Date().toISOString().slice(0,10); } // YYYY-MM-DD
+
+  function addRow(pref){
+    pref=pref||{};
+    rows.push({
+      date: pref.date||todayStr(),
+      desc: pref.desc||"",
+      amt:  pref.amt||"",
+      by:   pref.by||"",
+      to:   pref.to||"",
+      inv:  pref.inv||"",
+      cat:  pref.cat||"General"
+    });
+    renderRows();
+    recalc();
+  }
+
+  /* ---- BUILD the expense rows ---- */
+  function renderRows(){
+    var tb=$("rows"); tb.innerHTML="";
+    rows.forEach(function(r,i){
+      var tr=document.createElement("tr");
+      var catOpts=CATEGORIES.map(function(c){ return '<option'+(c===r.cat?' selected':'')+'>'+c+'</option>'; }).join("");
+      tr.innerHTML=
+        '<td><input type="date" data-i="'+i+'" data-k="date" value="'+r.date+'"></td>'+
+        '<td><input type="text" data-i="'+i+'" data-k="desc" value="'+esc(r.desc)+'" placeholder="What for"></td>'+
+        '<td class="amt"><input type="number" data-i="'+i+'" data-k="amt" value="'+r.amt+'" placeholder="0.00"></td>'+
+        '<td><input type="text" data-i="'+i+'" data-k="by" value="'+esc(r.by)+'" placeholder="Name"></td>'+
+        '<td><input type="text" data-i="'+i+'" data-k="to" value="'+esc(r.to)+'" placeholder="Vendor/person"></td>'+
+        '<td><input type="text" data-i="'+i+'" data-k="inv" value="'+esc(r.inv)+'" placeholder="INV-000"></td>'+
+        '<td><select data-i="'+i+'" data-k="cat">'+catOpts+'</select></td>'+
+        '<td class="no-print"><button class="delrow" data-del="'+i+'" aria-label="remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></td>';
+      tb.appendChild(tr);
+    });
+    tb.querySelectorAll("input,select").forEach(function(el){
+      el.addEventListener("input",function(){ rows[+this.dataset.i][this.dataset.k]=this.value; recalc(); });
+    });
+    tb.querySelectorAll("[data-del]").forEach(function(b){
+      b.onclick=function(){ rows.splice(+this.dataset.del,1); renderRows(); recalc(); };
+    });
+  }
+  function esc(s){ return (s||"").replace(/"/g,"&quot;"); }
+
+  /* ============================================================
+     TOTALS — total spent, and remaining = float - spent
+     ============================================================ */
+  function recalc(){
+    var cur=$("currency").value;
+    var flt=parseFloat($("float").value)||0;
+    var spent=0;
+    rows.forEach(function(r){ spent += parseFloat(r.amt)||0; });
+    var bal=flt-spent;
+
+    $("tCount").textContent=rows.length;
+    $("tSpent").textContent=cur+" "+spent.toFixed(2);
+    $("tBalance").textContent=cur+" "+bal.toFixed(2);
+    // turn balance card red if overspent
+    $("balCard").classList.toggle("neg", bal<0);
+  }
+
+  /* ============================================================
+     EXPORT — CSV (Excel) and Print (PDF via browser)
+     ============================================================ */
+  function csvCell(s){
+    s=(s==null?"":String(s));
+    if(/[",\n]/.test(s)) s='"'+s.replace(/"/g,'""')+'"';
+    return s;
+  }
+  function exportCsv(){
+    var cur=$("currency").value;
+    var header=["Date","Description","Amount ("+cur+")","Paid by","Paid to","Invoice #","Category"];
+    var lines=[header.map(csvCell).join(",")];
+    rows.forEach(function(r){
+      lines.push([r.date,r.desc,r.amt,r.by,r.to,r.inv,r.cat].map(csvCell).join(","));
+    });
+    // totals footer
+    var spent=rows.reduce(function(s,r){return s+(parseFloat(r.amt)||0);},0);
+    var flt=parseFloat($("float").value)||0;
+    lines.push("");
+    lines.push(["","","","","","","Starting float",flt].map(csvCell).join(","));
+    lines.push(["","","","","","","Total spent",spent.toFixed(2)].map(csvCell).join(","));
+    lines.push(["","","","","","","Remaining",(flt-spent).toFixed(2)].map(csvCell).join(","));
+
+    var name=($("fundName").value||"petty-cash").replace(/[^\w-]+/g,"-");
+    var blob=new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"}); // BOM = Excel opens UTF-8 cleanly
+    var a=document.createElement("a");
+    a.download=name+".csv"; a.href=URL.createObjectURL(blob); a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+  }
+
+  /* ============================================================
+     WIRE UP
+     ============================================================ */
+  $("addRow").onclick=function(){ addRow(); };
+  $("exportCsv").onclick=exportCsv;
+  $("printBtn").onclick=function(){ window.print(); };
+  $("currency").addEventListener("change",recalc);
+  $("float").addEventListener("input",recalc);
+
+  /* ---- START with a couple of example rows ---- */
+  addRow({desc:"Taxi to port",amt:45,by:"Ahmed",to:"Karwa Taxi",inv:"—",cat:"Travel"});
+  addRow({desc:"Print cartridges",amt:120,by:"Iris",to:"Office Depot",inv:"INV-2231",cat:"Office"});
+})();
+</script>
+</body>
+</html>

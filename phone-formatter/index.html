@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phone formatter · Sahil's tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#FFFFFF;--ink:#0A0A0A;--line:#E4E4E4;--line2:#CFCFCF;--muted:#6B6B6B;--card:#FAFAFA;--radius:12px;--ctrl:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:680px;margin:0 auto;padding:20px 20px 64px;}
+  header.site{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 22px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;}
+  .brand .mark{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;}
+  .brand a{color:inherit;text-decoration:none;}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);font-weight:500;}.privacy svg{width:15px;height:15px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);text-decoration:none;margin-bottom:14px;}.back svg{width:15px;height:15px;}.back:hover{color:var(--ink);}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,44px);letter-spacing:-0.02em;margin:0 0 6px;}
+  .sub{font-size:15px;color:var(--muted);margin:0 0 20px;}
+  .about{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:22px;font-size:13.5px;color:var(--muted);}
+  .about b{color:var(--ink);font-weight:600;}
+  label{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin:10px 0 4px;}
+  select,input{font-family:'Inter';font-size:15px;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:var(--ctrl);padding:11px 13px;width:100%;}
+  select:focus,input:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(10,10,10,0.07);}
+  input{font-family:'JetBrains Mono',monospace;}
+  .warn{font-size:12.5px;color:#8A6D00;margin-top:6px;display:none;}
+  .out{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:4px 16px;margin-top:18px;}
+  .orow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);}
+  .orow:last-child{border-bottom:none;}
+  .orow .lab{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+  .orow .val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;}
+  .orow a.val{color:inherit;text-decoration:underline;text-underline-offset:3px;}
+  .copy{font-size:12px;font-weight:500;padding:6px 11px;border-radius:8px;cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink);}
+  .copy:hover{background:#F0F0F0;}
+  .ref{margin-top:22px;}
+  .ref summary{cursor:pointer;font-weight:600;font-size:14px;padding:10px 0;}
+  .ref table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px;}
+  .ref td{padding:6px 8px;border-bottom:1px solid var(--line);}
+  .ref td.code{font-family:'JetBrains Mono',monospace;}
+  .foot{margin-top:34px;font-size:12.5px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <div class="brand"><span class="mark">S</span><a href="/">sahil's tools</a></div>
+    <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Runs in your browser</span>
+  </header>
+  <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>All tools</a>
+
+  <h1>Phone formatter</h1>
+  <p class="sub">Turn any number into the international format, a click-to-call link, and a WhatsApp link.</p>
+
+  <div class="about">
+    <b>What this does.</b> Pick the country, type the local number in any messy format — <b>5200 0831</b>, <b>052000831</b>, <b>(52) 000-831</b> — and get the clean <b>E.164 international format</b> (+97452000831) that CRMs, WhatsApp, and dialers expect. It strips spaces and punctuation, drops the local leading zero where countries use one, and warns if the length looks wrong for that country. You also get a click-to-call <b>tel:</b> link and a ready <b>wa.me</b> WhatsApp link.
+  </div>
+
+  <label>Country</label>
+  <select id="country"></select>
+  <label>Phone number (any format)</label>
+  <input id="num" placeholder="5200 0831" inputmode="tel">
+  <div class="warn" id="warn"></div>
+
+  <div class="out">
+    <div class="orow"><div><div class="lab">E.164 (standard)</div><div class="val" id="e164">—</div></div><button class="copy" data-c="e164">Copy</button></div>
+    <div class="orow"><div><div class="lab">International (readable)</div><div class="val" id="intl">—</div></div><button class="copy" data-c="intl">Copy</button></div>
+    <div class="orow"><div><div class="lab">Click to call</div><a class="val" id="telLink" href="#">—</a></div><button class="copy" data-c="telTxt">Copy</button></div>
+    <div class="orow"><div><div class="lab">WhatsApp link</div><a class="val" id="waLink" href="#" target="_blank" rel="noopener">—</a></div><button class="copy" data-c="waTxt">Copy</button></div>
+  </div>
+
+  <details class="ref">
+    <summary>Dial code quick reference</summary>
+    <table id="refTable"></table>
+  </details>
+
+  <p class="foot">Made for sahilshaikh.org · runs entirely in your browser</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+
+  /* ============================================================
+     COUNTRY DATA: [name, ISO, dial code, min-max national digits,
+     trunk zero?]  "trunk zero" = countries where local numbers
+     start with 0 that must be DROPPED when dialing internationally.
+     Lengths are typical ranges, used only to warn (not block).
+     ============================================================ */
+  var COUNTRIES=[
+    ["Qatar","QA","974",[8,8],false],
+    ["UAE","AE","971",[8,9],true],
+    ["Saudi Arabia","SA","966",[8,9],true],
+    ["Kuwait","KW","965",[8,8],false],
+    ["Bahrain","BH","973",[8,8],false],
+    ["Oman","OM","968",[8,8],false],
+    ["India","IN","91",[10,10],true],
+    ["Pakistan","PK","92",[9,10],true],
+    ["Bangladesh","BD","880",[8,10],true],
+    ["Sri Lanka","LK","94",[9,9],true],
+    ["Nepal","NP","977",[8,10],true],
+    ["Philippines","PH","63",[9,10],true],
+    ["Egypt","EG","20",[9,10],true],
+    ["Jordan","JO","962",[8,9],true],
+    ["Lebanon","LB","961",[7,8],true],
+    ["Turkey","TR","90",[10,10],true],
+    ["United Kingdom","GB","44",[9,10],true],
+    ["United States / Canada","US","1",[10,10],false],
+    ["Germany","DE","49",[9,11],true],
+    ["France","FR","33",[9,9],true],
+    ["Italy","IT","39",[8,11],false],
+    ["Spain","ES","34",[9,9],false],
+    ["Netherlands","NL","31",[9,9],true],
+    ["Switzerland","CH","41",[9,9],true],
+    ["Australia","AU","61",[9,9],true],
+    ["New Zealand","NZ","64",[8,10],true],
+    ["Singapore","SG","65",[8,8],false],
+    ["Malaysia","MY","60",[9,10],true],
+    ["Indonesia","ID","62",[9,12],true],
+    ["China","CN","86",[11,11],true],
+    ["Japan","JP","81",[9,10],true],
+    ["South Korea","KR","82",[9,10],true],
+    ["Hong Kong","HK","852",[8,8],false],
+    ["South Africa","ZA","27",[9,9],true],
+    ["Nigeria","NG","234",[10,10],true],
+    ["Kenya","KE","254",[9,9],true],
+    ["Morocco","MA","212",[9,9],true],
+    ["Brazil","BR","55",[10,11],true]
+  ];
+
+  /* fill dropdown + reference table */
+  var sel=$("country");
+  COUNTRIES.forEach(function(c,i){
+    sel.add(new Option(c[0]+"  (+"+c[2]+")", i));
+  });
+  sel.value=0; // Qatar default
+  $("refTable").innerHTML=COUNTRIES.map(function(c){
+    return "<tr><td>"+c[0]+"</td><td class='code'>+"+c[2]+"</td></tr>";
+  }).join("");
+
+  /* ============================================================
+     FORMAT:
+     1. strip everything except digits (and a leading +)
+     2. if it already starts with the dial code or +, use as-is
+     3. else drop one trunk zero if that country uses one
+     4. e164 = + dialcode + national
+     ============================================================ */
+  function format(){
+    var c=COUNTRIES[parseInt(sel.value,10)];
+    var dial=c[2], range=c[3], trunk=c[4];
+    var raw=$("num").value;
+    var digits=raw.replace(/[^\d+]/g,"");
+    var warn="";
+
+    if(!digits){ setOut(null); return; }
+
+    var national;
+    if(digits.indexOf("+"+dial)===0){ national=digits.slice(dial.length+1); }
+    else if(digits[0]==="+"){ warn="Number starts with a different country code than the selected country."; national=digits.slice(1); dial=""; }
+    else if(digits.indexOf("00"+dial)===0){ national=digits.slice(dial.length+2); }
+    else if(digits.indexOf(dial)===0 && digits.length>range[1]){ national=digits.slice(dial.length); }
+    else{
+      national=digits.replace(/\D/g,"");
+      if(trunk && national[0]==="0") national=national.slice(1); // drop trunk zero
+    }
+    national=national.replace(/\D/g,"");
+
+    if(dial && (national.length<range[0] || national.length>range[1])){
+      warn=warn || ("Heads up: "+c[0]+" numbers are usually "+(range[0]===range[1]?range[0]:range[0]+"–"+range[1])+" digits — you have "+national.length+".");
+    }
+
+    var e164 = dial ? ("+"+dial+national) : ("+"+national);
+    /* readable: split national into groups of 3-4 */
+    var groups=national.replace(/(\d{4})(?=\d)/g,"$1 ").trim();
+    var intl = dial ? ("+"+dial+" "+groups) : e164;
+
+    setOut({e164:e164,intl:intl,warn:warn});
+  }
+
+  function setOut(o){
+    if(!o){ ["e164","intl"].forEach(function(id){$(id).textContent="—";});
+      $("telLink").textContent="—"; $("telLink").href="#";
+      $("waLink").textContent="—"; $("waLink").href="#";
+      $("warn").style.display="none"; return; }
+    $("e164").textContent=o.e164;
+    $("intl").textContent=o.intl;
+    $("telLink").textContent="tel:"+o.e164; $("telLink").href="tel:"+o.e164;
+    var wa="https://wa.me/"+o.e164.replace("+","");
+    $("waLink").textContent=wa; $("waLink").href=wa;
+    $("warn").textContent=o.warn; $("warn").style.display=o.warn?"block":"none";
+  }
+
+  /* copies */
+  document.querySelectorAll(".copy").forEach(function(b){
+    b.onclick=function(){
+      var map={e164:$("e164").textContent,intl:$("intl").textContent,telTxt:$("telLink").textContent,waTxt:$("waLink").textContent};
+      var v=map[b.dataset.c]; if(v==="—")return;
+      navigator.clipboard.writeText(v).then(function(){ b.textContent="✓"; setTimeout(function(){b.textContent="Copy";},1200); });
+    };
+  });
+
+  sel.addEventListener("change",format);
+  $("num").addEventListener("input",format);
+})();
+</script>
+</body>
+</html>

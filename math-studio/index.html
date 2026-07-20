@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Studio - Calculators</title>
+    <style>
+        :root {
+            --accent: #000000;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --border: #E5E7EB;
+            --bg-light: #F9FAFB;
+            --bg-white: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-white);
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .explainer {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .explainer h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 1rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--accent);
+        }
+
+        .tool-section {
+            display: none;
+        }
+
+        .tool-section.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            background: var(--bg-white);
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+        }
+
+        button {
+            padding: 0.65rem 1.25rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: var(--bg-light);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .mt-1 { margin-top: 1rem; }
+        .mt-2 { margin-top: 1.5rem; }
+
+        .text-sm { font-size: 0.875rem; }
+        .text-muted { color: var(--text-secondary); }
+
+        .result-box {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .result-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .result-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+        }
+
+        .output-box {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+
+        @media (max-width: 640px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+            .tab-btn { min-width: 80px; font-size: 0.8rem; padding: 0.75rem; }
+            .flex-row { flex-direction: column; }
+            .flex-col { min-width: unset; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div>
+            <a href="/" class="back-link">← Back to Tools</a>
+            <h1>Math Studio</h1>
+        </div>
+
+        <div class="explainer">
+            <h3>What This Does</h3>
+            <p>Five calculators in one: percentage calculations, tip & bill splitter, compound interest, aspect ratio finder, and roman numeral converter. All with live results.</p>
+        </div>
+
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchTab('percentage')">Percentage</button>
+            <button class="tab-btn" onclick="switchTab('tip')">Tip</button>
+            <button class="tab-btn" onclick="switchTab('interest')">Interest</button>
+            <button class="tab-btn" onclick="switchTab('aspect')">Aspect</button>
+            <button class="tab-btn" onclick="switchTab('roman')">Roman</button>
+        </div>
+
+        <!-- ===== PERCENTAGE ===== -->
+        <div id="percentage" class="tool-section active">
+            <div class="card">
+                <div class="card-title">Percentage Calculator</div>
+                <div class="flex-row">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Value</label>
+                        <input type="number" id="pct-value" placeholder="0" oninput="calcPercentage()">
+                    </div>
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Percentage (%)</label>
+                        <input type="number" id="pct-percent" placeholder="0" oninput="calcPercentage()">
+                    </div>
+                </div>
+
+                <div class="flex-row mt-1">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Result</label>
+                        <input type="text" id="pct-result" readonly>
+                    </div>
+                    <button onclick="copyValue('pct-result')" style="align-self: flex-end;">Copy</button>
+                </div>
+
+                <div class="flex-row mt-2">
+                    <div class="result-box" style="flex: 1;">
+                        <div class="result-label">As % of</div>
+                        <div class="result-value" id="pct-of"></div>
+                    </div>
+                    <div class="result-box" style="flex: 1;">
+                        <div class="result-label">Increase by %</div>
+                        <div class="result-value" id="pct-increase"></div>
+                    </div>
+                    <div class="result-box" style="flex: 1;">
+                        <div class="result-label">Decrease by %</div>
+                        <div class="result-value" id="pct-decrease"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TIP ===== -->
+        <div id="tip" class="tool-section">
+            <div class="card">
+                <div class="card-title">Tip & Bill Splitter</div>
+                <div class="flex-row">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Bill Amount</label>
+                        <input type="number" id="tip-bill" placeholder="0.00" step="0.01" oninput="calcTip()">
+                    </div>
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Tip %</label>
+                        <input type="number" id="tip-percent" placeholder="18" value="18" step="0.5" oninput="calcTip()">
+                    </div>
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">People</label>
+                        <input type="number" id="tip-people" placeholder="1" value="1" min="1" oninput="calcTip()">
+                    </div>
+                </div>
+
+                <div class="flex-row mt-2">
+                    <div class="result-box" style="flex: 1;">
+                        <div class="result-label">Tip Amount</div>
+                        <div class="result-value" id="tip-amount">$0.00</div>
+                    </div>
+                    <div class="result-box" style="flex: 1;">
+                        <div class="result-label">Total Bill</div>
+                        <div class="result-value" id="tip-total">$0.00</div>
+                    </div>
+                    <div class="result-box" style="flex: 1;">
+                        <div class="result-label">Per Person</div>
+                        <div class="result-value" id="tip-person">$0.00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== INTEREST ===== -->
+        <div id="interest" class="tool-section">
+            <div class="card">
+                <div class="card-title">Compound Interest Calculator</div>
+                <div class="flex-row">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Principal ($)</label>
+                        <input type="number" id="int-principal" placeholder="1000" value="1000" step="0.01" oninput="calcInterest()">
+                    </div>
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Rate (% per year)</label>
+                        <input type="number" id="int-rate" placeholder="5" value="5" step="0.01" oninput="calcInterest()">
+                    </div>
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Years</label>
+                        <input type="number" id="int-years" placeholder="10" value="10" step="0.5" oninput="calcInterest()">
+                    </div>
+                </div>
+
+                <div class="flex-row mt-1">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Compounds</label>
+                        <select id="int-compounds" onchange="calcInterest()">
+                            <option value="1">Annually</option>
+                            <option value="2">Semi-annually</option>
+                            <option value="4">Quarterly</option>
+                            <option value="12" selected>Monthly</option>
+                            <option value="365">Daily</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex-row mt-2">
+                    <div class="result-box" style="flex: 1;">
+                        <div class="result-label">Final Amount</div>
+                        <div class="result-value" id="int-amount">$0.00</div>
+                    </div>
+                    <div class="result-box" style="flex: 1;">
+                        <div class="result-label">Interest Earned</div>
+                        <div class="result-value" id="int-earned">$0.00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ASPECT RATIO ===== -->
+        <div id="aspect" class="tool-section">
+            <div class="card">
+                <div class="card-title">Aspect Ratio Calculator</div>
+                <div class="flex-row">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Width</label>
+                        <input type="number" id="asp-w" placeholder="1920" value="1920" oninput="calcAspect()">
+                    </div>
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Height</label>
+                        <input type="number" id="asp-h" placeholder="1080" value="1080" oninput="calcAspect()">
+                    </div>
+                </div>
+
+                <div class="result-box mt-2">
+                    <div class="result-label">Aspect Ratio</div>
+                    <div class="result-value" id="asp-ratio">16:9</div>
+                </div>
+
+                <div class="flex-row mt-2">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Scale to Width</label>
+                        <input type="number" id="asp-scale-w" placeholder="1280" oninput="scaleAspect('w')">
+                    </div>
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">New Height</label>
+                        <input type="text" id="asp-scale-h" readonly>
+                    </div>
+                </div>
+
+                <div class="flex-row mt-2">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Scale to Height</label>
+                        <input type="number" id="asp-scale-h2" placeholder="720" oninput="scaleAspect('h')">
+                    </div>
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">New Width</label>
+                        <input type="text" id="asp-scale-w2" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ROMAN NUMERALS ===== -->
+        <div id="roman" class="tool-section">
+            <div class="card">
+                <div class="card-title">Roman Numeral Converter</div>
+                <div class="flex-row">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Number (1-3999)</label>
+                        <input type="number" id="rom-num" placeholder="1994" min="1" max="3999" oninput="numToRoman()">
+                    </div>
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Roman Numeral</label>
+                        <input type="text" id="rom-text" placeholder="MCMXCIV" oninput="romanToNum()">
+                    </div>
+                </div>
+
+                <div class="output-box mt-2" id="rom-output">MCMXCIV = 1994</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== TAB SWITCHING =====
+        function switchTab(tabName) {
+            document.querySelectorAll('.tool-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // ===== COPY VALUE =====
+        function copyValue(id) {
+            const val = document.getElementById(id).value;
+            navigator.clipboard.writeText(val).then(() => {
+                const btn = event.target;
+                const orig = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => btn.textContent = orig, 2000);
+            });
+        }
+
+        // ===== PERCENTAGE CALC =====
+        function calcPercentage() {
+            const val = parseFloat(document.getElementById('pct-value').value) || 0;
+            const pct = parseFloat(document.getElementById('pct-percent').value) || 0;
+            
+            const result = (val * pct / 100).toFixed(2);
+            const ofTotal = (val / pct * 100).toFixed(2);
+            const increase = (val + result).toFixed(2);
+            const decrease = (val - result).toFixed(2);
+
+            document.getElementById('pct-result').value = result;
+            document.getElementById('pct-of').textContent = isFinite(ofTotal) ? ofTotal : '0.00';
+            document.getElementById('pct-increase').textContent = increase;
+            document.getElementById('pct-decrease').textContent = decrease;
+        }
+
+        // ===== TIP CALCULATOR =====
+        function calcTip() {
+            const bill = parseFloat(document.getElementById('tip-bill').value) || 0;
+            const pct = parseFloat(document.getElementById('tip-percent').value) || 0;
+            const people = parseInt(document.getElementById('tip-people').value) || 1;
+
+            const tip = bill * pct / 100;
+            const total = bill + tip;
+            const perPerson = total / people;
+
+            document.getElementById('tip-amount').textContent = '$' + tip.toFixed(2);
+            document.getElementById('tip-total').textContent = '$' + total.toFixed(2);
+            document.getElementById('tip-person').textContent = '$' + perPerson.toFixed(2);
+        }
+
+        // ===== COMPOUND INTEREST =====
+        function calcInterest() {
+            const principal = parseFloat(document.getElementById('int-principal').value) || 0;
+            const rate = parseFloat(document.getElementById('int-rate').value) || 0;
+            const years = parseFloat(document.getElementById('int-years').value) || 0;
+            const compounds = parseInt(document.getElementById('int-compounds').value) || 12;
+
+            // Formula: A = P(1 + r/n)^(nt)
+            const amount = principal * Math.pow(1 + (rate / 100) / compounds, compounds * years);
+            const interest = amount - principal;
+
+            document.getElementById('int-amount').textContent = '$' + amount.toFixed(2);
+            document.getElementById('int-earned').textContent = '$' + interest.toFixed(2);
+        }
+
+        // ===== ASPECT RATIO =====
+        function calcAspect() {
+            const w = parseInt(document.getElementById('asp-w').value) || 1;
+            const h = parseInt(document.getElementById('asp-h').value) || 1;
+            
+            // Find GCD to simplify ratio
+            const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+            const divisor = gcd(w, h);
+            const ratioW = w / divisor;
+            const ratioH = h / divisor;
+
+            document.getElementById('asp-ratio').textContent = ratioW + ':' + ratioH;
+        }
+
+        function scaleAspect(axis) {
+            const w = parseInt(document.getElementById('asp-w').value) || 1;
+            const h = parseInt(document.getElementById('asp-h').value) || 1;
+
+            if (axis === 'w') {
+                const newW = parseInt(document.getElementById('asp-scale-w').value);
+                const newH = Math.round(newW * h / w);
+                document.getElementById('asp-scale-h').value = newH;
+            } else {
+                const newH = parseInt(document.getElementById('asp-scale-h2').value);
+                const newW = Math.round(newH * w / h);
+                document.getElementById('asp-scale-w2').value = newW;
+            }
+        }
+
+        // ===== ROMAN NUMERALS =====
+        function numToRoman() {
+            const num = parseInt(document.getElementById('rom-num').value);
+            if (!num || num < 1 || num > 3999) {
+                document.getElementById('rom-text').value = '';
+                return;
+            }
+
+            const romanMap = [
+                { val: 1000, sym: 'M' },
+                { val: 900, sym: 'CM' },
+                { val: 500, sym: 'D' },
+                { val: 400, sym: 'CD' },
+                { val: 100, sym: 'C' },
+                { val: 90, sym: 'XC' },
+                { val: 50, sym: 'L' },
+                { val: 40, sym: 'XL' },
+                { val: 10, sym: 'X' },
+                { val: 9, sym: 'IX' },
+                { val: 5, sym: 'V' },
+                { val: 4, sym: 'IV' },
+                { val: 1, sym: 'I' }
+            ];
+
+            let result = '';
+            let n = num;
+            for (let i = 0; i < romanMap.length; i++) {
+                while (n >= romanMap[i].val) {
+                    result += romanMap[i].sym;
+                    n -= romanMap[i].val;
+                }
+            }
+
+            document.getElementById('rom-text').value = result;
+            document.getElementById('rom-output').textContent = result + ' = ' + num;
+        }
+
+        function romanToNum() {
+            const roman = document.getElementById('rom-text').value.toUpperCase();
+            if (!roman) return;
+
+            const romanMap = {
+                'I': 1, 'V': 5, 'X': 10, 'L': 50,
+                'C': 100, 'D': 500, 'M': 1000
+            };
+
+            let result = 0;
+            for (let i = 0; i < roman.length; i++) {
+                const current = romanMap[roman[i]];
+                const next = romanMap[roman[i + 1]];
+
+                if (!current) {
+                    document.getElementById('rom-output').textContent = 'Invalid roman numeral';
+                    return;
+                }
+
+                if (next && current < next) {
+                    result -= current;
+                } else {
+                    result += current;
+                }
+            }
+
+            document.getElementById('rom-num').value = result;
+            document.getElementById('rom-output').textContent = roman + ' = ' + result;
+        }
+
+        // Initialize
+        calcPercentage();
+        calcTip();
+        calcInterest();
+        calcAspect();
+    </script>
+</body>
+</html>

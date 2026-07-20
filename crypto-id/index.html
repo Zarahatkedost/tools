@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto & ID Studio</title>
+    <style>
+        :root {
+            --accent: #000000;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --border: #E5E7EB;
+            --bg-light: #F9FAFB;
+            --bg-white: #FFFFFF;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; background: var(--bg-white); color: var(--text-primary); }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem 1rem; }
+        .back-link { display: inline-block; margin-bottom: 1rem; color: var(--accent); text-decoration: none; font-size: 0.875rem; font-weight: 500; }
+        h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .explainer { background: var(--bg-light); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; }
+        .explainer h3 { font-size: 0.875rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .explainer p { font-size: 0.9rem; line-height: 1.5; }
+        .tab-container { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 2rem; overflow-x: auto; }
+        .tab-btn { flex: 1; min-width: 110px; padding: 1rem; background: none; border: none; border-bottom: 3px solid transparent; font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); cursor: pointer; white-space: nowrap; }
+        .tab-btn.active { color: var(--text-primary); border-bottom-color: var(--accent); }
+        .tool-section { display: none; }
+        .tool-section.active { display: block; }
+        .card { background: var(--bg-white); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .card-title { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; }
+        input, textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-family: 'Courier New', monospace; font-size: 0.9rem; color: var(--text-primary); background: var(--bg-white); }
+        input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+        textarea { resize: vertical; min-height: 80px; }
+        button { padding: 0.65rem 1.25rem; background: var(--accent); color: white; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        button:hover { opacity: 0.9; }
+        .btn-secondary { background: var(--bg-light); color: var(--text-primary); border: 1px solid var(--border); }
+        .flex-row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end; }
+        .flex-col { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; min-width: 150px; }
+        .mt-1 { margin-top: 1rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-muted { color: var(--text-secondary); }
+        .output-box { background: var(--bg-light); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-top: 1rem; font-family: 'Courier New', monospace; font-size: 0.85rem; word-break: break-all; }
+        .settings { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .setting { display: flex; gap: 0.5rem; align-items: center; }
+        .setting input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        .setting label { font-size: 0.85rem; cursor: pointer; }
+        .strength { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; padding: 0.25rem 0.75rem; border-radius: 3px; display: inline-block; margin-top: 0.5rem; }
+        .strength-weak { background: #fee2e2; color: #991b1b; }
+        .strength-fair { background: #fef3c7; color: #92400e; }
+        .strength-good { background: #dbeafe; color: #1e40af; }
+        .strength-strong { background: #dcfce7; color: #166534; }
+        .list-output { background: var(--bg-light); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-top: 1rem; max-height: 200px; overflow-y: auto; }
+        .list-item { font-family: 'Courier New', monospace; font-size: 0.85rem; padding: 0.5rem; border-bottom: 1px solid var(--border); }
+        .list-item:last-child { border-bottom: none; }
+        @media (max-width: 640px) { .container { padding: 1rem; } h1 { font-size: 1.5rem; } .tab-btn { min-width: 90px; font-size: 0.8rem; padding: 0.75rem; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Tools</a>
+        <h1>Crypto & ID Studio</h1>
+        
+        <div class="explainer">
+            <h3>What This Does</h3>
+            <p>
+                Generate secure random values using <strong>crypto.getRandomValues()</strong> (not Math.random()).
+                Create strong passwords, UUIDs v4, and passphrases. All generation happens locally in your browser—nothing is sent anywhere.
+            </p>
+        </div>
+
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchTab('password')">Password</button>
+            <button class="tab-btn" onclick="switchTab('uuid')">UUID</button>
+            <button class="tab-btn" onclick="switchTab('passphrase')">Passphrase</button>
+        </div>
+
+        <!-- PASSWORD GENERATOR -->
+        <div id="password" class="tool-section active">
+            <div class="card">
+                <div class="card-title">Secure Password Generator</div>
+                
+                <div class="flex-row">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Length</label>
+                        <input type="number" id="pwd-length" value="16" min="4" max="128">
+                    </div>
+                </div>
+
+                <div class="settings mt-1">
+                    <label class="setting">
+                        <input type="checkbox" id="pwd-upper" checked>
+                        <span>Uppercase (A-Z)</span>
+                    </label>
+                    <label class="setting">
+                        <input type="checkbox" id="pwd-lower" checked>
+                        <span>Lowercase (a-z)</span>
+                    </label>
+                    <label class="setting">
+                        <input type="checkbox" id="pwd-numbers" checked>
+                        <span>Numbers (0-9)</span>
+                    </label>
+                    <label class="setting">
+                        <input type="checkbox" id="pwd-symbols" checked>
+                        <span>Symbols (!@#$...)</span>
+                    </label>
+                </div>
+
+                <button onclick="generatePassword()" class="mt-1">Generate Password</button>
+
+                <div class="output-box" id="pwd-output">Click generate to create password</div>
+
+                <div id="pwd-strength" style="margin-top: 0.5rem;"></div>
+
+                <div class="flex-row mt-1">
+                    <button onclick="copyValue('pwd-output')">Copy</button>
+                    <button onclick="generatePassword()" class="btn-secondary">Regenerate</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- UUID GENERATOR -->
+        <div id="uuid" class="tool-section">
+            <div class="card">
+                <div class="card-title">UUID v4 Generator</div>
+                <p class="text-sm text-muted" style="margin-bottom: 1rem;">Generates random UUIDs following RFC 4122 v4 specification using cryptographically secure randomness.</p>
+
+                <div class="flex-row">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Generate</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="generateSingleUUID()" style="flex: 1;">Single UUID</button>
+                            <button onclick="generateMultipleUUIDs()" class="btn-secondary" style="flex: 1;">Multiple (5)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-1">
+                    <label class="text-sm text-muted">UUID(s)</label>
+                    <div class="list-output" id="uuid-output">
+                        <div class="list-item">Generate a UUID to start</div>
+                    </div>
+                </div>
+
+                <button onclick="copyAll('uuid-output')" class="mt-1">Copy All</button>
+            </div>
+        </div>
+
+        <!-- PASSPHRASE GENERATOR -->
+        <div id="passphrase" class="tool-section">
+            <div class="card">
+                <div class="card-title">Secure Passphrase Generator</div>
+                <p class="text-sm text-muted" style="margin-bottom: 1rem;">Generate memorable but secure passphrases using random word combinations.</p>
+
+                <div class="flex-row">
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Word Count</label>
+                        <input type="number" id="pp-count" value="4" min="2" max="10">
+                    </div>
+                    <div class="flex-col">
+                        <label class="text-sm text-muted">Separator</label>
+                        <input type="text" id="pp-sep" value="-" maxlength="3">
+                    </div>
+                </div>
+
+                <div class="settings mt-1">
+                    <label class="setting">
+                        <input type="checkbox" id="pp-capitalize" checked>
+                        <span>Capitalize Words</span>
+                    </label>
+                    <label class="setting">
+                        <input type="checkbox" id="pp-numbers">
+                        <span>Add Numbers</span>
+                    </label>
+                </div>
+
+                <button onclick="generatePassphrase()" class="mt-1">Generate Passphrase</button>
+
+                <div class="output-box" id="pp-output">Click generate to create passphrase</div>
+
+                <div class="flex-row mt-1">
+                    <button onclick="copyValue('pp-output')">Copy</button>
+                    <button onclick="generatePassphrase()" class="btn-secondary">Regenerate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== TAB SWITCHING =====
+        function switchTab(tab) {
+            document.querySelectorAll('.tool-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // ===== COPY VALUE =====
+        function copyValue(id) {
+            const val = document.getElementById(id).textContent;
+            navigator.clipboard.writeText(val).then(() => {
+                const btn = event.target;
+                const orig = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => btn.textContent = orig, 2000);
+            });
+        }
+
+        function copyAll(id) {
+            const items = document.querySelectorAll(`#${id} .list-item`);
+            let text = '';
+            items.forEach(item => {
+                if (item.textContent.trim() !== 'Generate a UUID to start') {
+                    text += item.textContent + '\n';
+                }
+            });
+            navigator.clipboard.writeText(text.trim()).then(() => {
+                const btn = event.target;
+                const orig = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => btn.textContent = orig, 2000);
+            });
+        }
+
+        // ===== SECURE RANDOM =====
+        function secureRandom(max) {
+            const buf = new Uint32Array(1);
+            crypto.getRandomValues(buf);
+            return buf[0] % max;
+        }
+
+        // ===== PASSWORD GENERATOR =====
+        function generatePassword() {
+            const length = parseInt(document.getElementById('pwd-length').value) || 16;
+            const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const lower = 'abcdefghijklmnopqrstuvwxyz';
+            const numbers = '0123456789';
+            const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+            let chars = '';
+            if (document.getElementById('pwd-upper').checked) chars += upper;
+            if (document.getElementById('pwd-lower').checked) chars += lower;
+            if (document.getElementById('pwd-numbers').checked) chars += numbers;
+            if (document.getElementById('pwd-symbols').checked) chars += symbols;
+
+            if (!chars) chars = lower + numbers;
+
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                password += chars[secureRandom(chars.length)];
+            }
+
+            document.getElementById('pwd-output').textContent = password;
+            updatePasswordStrength(password);
+        }
+
+        function updatePasswordStrength(pwd) {
+            let strength = 0;
+            if (pwd.length >= 12) strength++;
+            if (pwd.length >= 16) strength++;
+            if (/[a-z]/.test(pwd)) strength++;
+            if (/[A-Z]/.test(pwd)) strength++;
+            if (/[0-9]/.test(pwd)) strength++;
+            if (/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(pwd)) strength++;
+
+            const labels = ['Weak', 'Fair', 'Good', 'Good', 'Strong', 'Strong'];
+            const classes = ['strength-weak', 'strength-fair', 'strength-good', 'strength-good', 'strength-strong', 'strength-strong'];
+
+            const strengthDiv = document.getElementById('pwd-strength');
+            strengthDiv.innerHTML = `<div class="strength ${classes[strength] || classes[0]}">${labels[strength] || labels[0]}</div>`;
+        }
+
+        // ===== UUID GENERATOR =====
+        function generateUUID() {
+            const bytes = new Uint8Array(16);
+            crypto.getRandomValues(bytes);
+            
+            // Set version (4) and variant bits
+            bytes[6] = (bytes[6] & 0x0f) | 0x40;
+            bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+            const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+            return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+        }
+
+        function generateSingleUUID() {
+            const uuid = generateUUID();
+            document.getElementById('uuid-output').innerHTML = `<div class="list-item">${uuid}</div>`;
+        }
+
+        function generateMultipleUUIDs() {
+            const uuids = [];
+            for (let i = 0; i < 5; i++) {
+                uuids.push(generateUUID());
+            }
+            document.getElementById('uuid-output').innerHTML = uuids.map(u => `<div class="list-item">${u}</div>`).join('');
+        }
+
+        // ===== PASSPHRASE GENERATOR =====
+        const wordList = ['admiral', 'agile', 'alert', 'alien', 'anchor', 'angel', 'animal', 'annual', 'apart', 'apple', 'apply', 'arcane', 'arctic', 'area', 'arena', 'argue', 'arise', 'array', 'arrow', 'artist', 'aspect', 'asset', 'atom', 'attack', 'attend', 'attitude', 'attract', 'auction', 'audit', 'august', 'aunt', 'author', 'auto', 'autumn', 'avenue', 'avoid', 'awake', 'aware', 'away', 'awesome', 'awful', 'awkward', 'axis', 'baby', 'bachelor', 'back', 'bad', 'badge', 'bag', 'bail', 'bait', 'balance', 'balcony', 'ball', 'bamboo', 'banana', 'band', 'bank', 'bar', 'bare', 'bargain', 'barrel', 'base', 'basic', 'basket', 'battle', 'beach', 'bean', 'bear', 'beast', 'beauty', 'because', 'become', 'beef', 'been', 'beer', 'before', 'began', 'begin', 'behalf', 'behave', 'behind', 'believe', 'below', 'belt', 'bench', 'beneath', 'benefit', 'bent', 'berry', 'beside', 'best', 'betray', 'better', 'between', 'beyond', 'bicycle', 'bid', 'bike', 'bind', 'biology', 'bird', 'birth', 'bitter', 'black', 'blade', 'blame', 'blank', 'blast', 'bleak', 'bleat', 'blend', 'bless', 'blind', 'blood', 'blossom', 'blouse', 'blue', 'blunt', 'blur', 'blush', 'board', 'boat', 'body', 'boil', 'bold', 'bolt', 'bomb', 'bone', 'bonus', 'book', 'boom', 'boost', 'border', 'bore', 'born', 'borrow', 'boss', 'bottom', 'bounce', 'box', 'boy', 'bracket', 'brain', 'brand', 'brass', 'brave', 'bread', 'breeze', 'brick', 'bridge', 'brief', 'bright', 'bring', 'brink', 'brisk', 'broccoli', 'broken', 'bronze', 'brood', 'brook', 'broom', 'brother', 'brow', 'brown', 'browse', 'brush', 'bubble', 'buddy', 'budget', 'buffalo', 'build', 'built', 'bulb', 'bulk', 'bullet', 'bundle', 'bunny', 'burden', 'burger', 'burst', 'bus', 'business', 'busy', 'but', 'butter', 'button', 'buyer', 'buzz'];
+
+        function generatePassphrase() {
+            const count = parseInt(document.getElementById('pp-count').value) || 4;
+            const sep = document.getElementById('pp-sep').value || '-';
+            const capitalize = document.getElementById('pp-capitalize').checked;
+
+            let words = [];
+            for (let i = 0; i < count; i++) {
+                const word = wordList[secureRandom(wordList.length)];
+                words.push(capitalize ? word.charAt(0).toUpperCase() + word.slice(1) : word);
+            }
+
+            let passphrase = words.join(sep);
+
+            if (document.getElementById('pp-numbers').checked) {
+                const num = secureRandom(100);
+                passphrase += sep + num;
+            }
+
+            document.getElementById('pp-output').textContent = passphrase;
+        }
+
+        // Initialize
+        generatePassword();
+    </script>
+</body>
+</html>

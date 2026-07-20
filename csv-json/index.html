@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSV ↔ JSON converter · Sahil's tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#FFFFFF;--ink:#0A0A0A;--line:#E4E4E4;--line2:#CFCFCF;--muted:#6B6B6B;--card:#FAFAFA;--radius:12px;--ctrl:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:900px;margin:0 auto;padding:20px 20px 64px;}
+  header.site{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 22px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;}
+  .brand .mark{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;}
+  .brand a{color:inherit;text-decoration:none;}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);font-weight:500;}.privacy svg{width:15px;height:15px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);text-decoration:none;margin-bottom:14px;}.back svg{width:15px;height:15px;}.back:hover{color:var(--ink);}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,44px);letter-spacing:-0.02em;margin:0 0 6px;}
+  .sub{font-size:15px;color:var(--muted);margin:0 0 20px;}
+  .about{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:22px;font-size:13.5px;color:var(--muted);}
+  .about b{color:var(--ink);font-weight:600;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
+  .btn{font-family:'Inter';font-size:13.5px;font-weight:500;padding:10px 14px;border-radius:var(--ctrl);cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink);display:inline-flex;align-items:center;gap:7px;transition:all .15s;}
+  .btn:hover{background:#F0F0F0;}.btn.dark{background:var(--ink);color:#fff;border-color:var(--ink);}.btn svg{width:15px;height:15px;}
+  textarea{width:100%;min-height:220px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:var(--ctrl);padding:12px;resize:vertical;}
+  textarea:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(10,10,10,0.07);}
+  label.small{font-size:12.5px;font-weight:500;color:var(--muted);display:block;margin:0 0 5px;}
+  .err{background:#F6E5E3;color:#B23B2E;border-radius:var(--ctrl);padding:10px 12px;font-size:13px;margin-bottom:12px;display:none;}
+  .stat{font-size:12.5px;color:var(--muted);}
+  .foot{margin-top:34px;font-size:12.5px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <div class="brand"><span class="mark">S</span><a href="/">sahil's tools</a></div>
+    <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Runs in your browser</span>
+  </header>
+  <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>All tools</a>
+
+  <h1>CSV ↔ JSON</h1>
+  <p class="sub">Paste one side, get the other — spreadsheet data to JSON and back.</p>
+
+  <div class="about">
+    <b>What this does.</b> Converts CSV (the format Excel and Google Sheets export) into JSON, and JSON back into CSV. It uses a <b>proper CSV parser</b>: quoted fields, commas inside values, quotes inside quotes and multi-line cells are all handled correctly — the things naive converters break on. First CSV row is treated as headers. JSON side accepts an array of objects. You can also upload a .csv or .json file, and download the result.
+  </div>
+
+  <div class="err" id="err"></div>
+
+  <div class="row">
+    <label class="small" style="margin:0;">CSV</label>
+    <span style="flex:1;"></span>
+    <input type="file" id="fileUp" accept=".csv,.json,.txt" style="display:none;">
+    <button class="btn" id="upBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>Upload file</button>
+  </div>
+  <textarea id="csvBox" placeholder='name,role,city&#10;Sahil,"BD Executive",Doha&#10;Iris,"Demos, proposals",Doha'></textarea>
+
+  <div class="row" style="justify-content:center;margin:14px 0;">
+    <button class="btn dark" id="toJson">CSV → JSON ↓</button>
+    <button class="btn dark" id="toCsv">↑ JSON → CSV</button>
+  </div>
+
+  <label class="small">JSON (array of objects)</label>
+  <textarea id="jsonBox" placeholder='[&#10;  {"name":"Sahil","role":"BD Executive","city":"Doha"}&#10;]'></textarea>
+
+  <div class="row" style="margin-top:14px;">
+    <button class="btn" id="dlCsv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Download CSV</button>
+    <button class="btn" id="dlJson"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Download JSON</button>
+    <span class="stat" id="stat"></span>
+  </div>
+
+  <p class="foot">Made for sahilshaikh.org · runs entirely in your browser</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  function err(m){ var e=$("err"); if(!m){e.style.display="none";return;} e.textContent=m; e.style.display="block"; }
+
+  /* ============================================================
+     CSV PARSER — a small state machine.
+     Handles: quoted fields, commas inside quotes, "" escaped
+     quotes, and newlines inside quoted cells. Returns rows of cells.
+     ============================================================ */
+  function parseCSV(text){
+    var rows=[], row=[], cell="", inQ=false, i=0;
+    // normalise line endings
+    text=text.replace(/\r\n/g,"\n").replace(/\r/g,"\n");
+    while(i<text.length){
+      var ch=text[i];
+      if(inQ){
+        if(ch==='"'){
+          if(text[i+1]==='"'){ cell+='"'; i+=2; continue; } // escaped quote
+          inQ=false; i++; continue;
+        }
+        cell+=ch; i++; continue;
+      }
+      if(ch==='"'){ inQ=true; i++; continue; }
+      if(ch===","){ row.push(cell); cell=""; i++; continue; }
+      if(ch==="\n"){ row.push(cell); rows.push(row); row=[]; cell=""; i++; continue; }
+      cell+=ch; i++;
+    }
+    // last cell/row (if text doesn't end with newline)
+    if(cell!=="" || row.length){ row.push(cell); rows.push(row); }
+    // drop fully-empty trailing rows
+    while(rows.length && rows[rows.length-1].every(function(c){return c==="";})) rows.pop();
+    return rows;
+  }
+
+  /* ---- escape one value for CSV output ---- */
+  function csvEscape(v){
+    v = (v===null||v===undefined) ? "" : String(v);
+    if(/[",\n]/.test(v)) return '"'+v.replace(/"/g,'""')+'"';
+    return v;
+  }
+
+  /* ============================================================
+     CSV -> JSON : first row = headers, each later row = object
+     ============================================================ */
+  $("toJson").onclick=function(){
+    err("");
+    var text=$("csvBox").value.trim();
+    if(!text){ err("Paste some CSV first."); return; }
+    var rows=parseCSV(text);
+    if(rows.length<2){ err("Need a header row plus at least one data row."); return; }
+    var headers=rows[0].map(function(h,idx){ return h.trim()||("column"+(idx+1)); });
+    var out=rows.slice(1).map(function(r){
+      var o={};
+      headers.forEach(function(h,idx){ o[h]= r[idx]!==undefined ? r[idx] : ""; });
+      return o;
+    });
+    $("jsonBox").value=JSON.stringify(out,null,2);
+    $("stat").textContent=out.length+" rows → JSON";
+  };
+
+  /* ============================================================
+     JSON -> CSV : array of objects; header = union of all keys
+     ============================================================ */
+  $("toCsv").onclick=function(){
+    err("");
+    var text=$("jsonBox").value.trim();
+    if(!text){ err("Paste some JSON first."); return; }
+    var data;
+    try{ data=JSON.parse(text); }catch(e){ err("Invalid JSON: "+e.message); return; }
+    if(!Array.isArray(data)) data=[data];
+    if(!data.length){ err("JSON array is empty."); return; }
+    // union of keys across all objects, in first-seen order
+    var keys=[];
+    data.forEach(function(o){
+      if(o && typeof o==="object" && !Array.isArray(o)){
+        Object.keys(o).forEach(function(k){ if(keys.indexOf(k)===-1) keys.push(k); });
+      }
+    });
+    if(!keys.length){ err("Expected an array of objects, e.g. [{\"a\":1}]."); return; }
+    var lines=[ keys.map(csvEscape).join(",") ];
+    data.forEach(function(o){
+      lines.push(keys.map(function(k){
+        var v=(o&&typeof o==="object")?o[k]:"";
+        if(v!==null && typeof v==="object") v=JSON.stringify(v); // nested -> stringify
+        return csvEscape(v);
+      }).join(","));
+    });
+    $("csvBox").value=lines.join("\n");
+    $("stat").textContent=data.length+" objects → CSV";
+  };
+
+  /* ---- file upload: route by extension ---- */
+  $("upBtn").onclick=function(){ $("fileUp").click(); };
+  $("fileUp").addEventListener("change",function(){
+    var f=this.files[0]; if(!f) return;
+    var r=new FileReader();
+    r.onload=function(){
+      if(/\.json$/i.test(f.name)) $("jsonBox").value=r.result;
+      else $("csvBox").value=r.result;
+    };
+    r.readAsText(f);
+  });
+
+  /* ---- downloads (UTF-8 BOM on CSV so Excel opens it right) ---- */
+  function dl(name,content,type,bom){
+    var blob=new Blob(bom?["\uFEFF",content]:[content],{type:type});
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(blob); a.download=name; a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+  }
+  $("dlCsv").onclick=function(){ if($("csvBox").value) dl("data.csv",$("csvBox").value,"text/csv;charset=utf-8",true); };
+  $("dlJson").onclick=function(){ if($("jsonBox").value) dl("data.json",$("jsonBox").value,"application/json"); };
+})();
+</script>
+</body>
+</html>

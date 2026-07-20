@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Studio - All-in-One Text Tools</title>
+    <style>
+        /* ===== THEME & VARIABLES ===== */
+        :root {
+            --accent: #000000; /* Change to #4F46E5 or any color for accent tint */
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --border: #E5E7EB;
+            --bg-light: #F9FAFB;
+            --bg-white: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-white);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* ===== HEADER & BACK LINK ===== */
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+
+        .back-link:hover {
+            opacity: 0.7;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        /* ===== EXPLAINER BOX ===== */
+        .explainer {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .explainer h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .explainer p {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* ===== TABS ===== */
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 1rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        /* ===== TOOL SECTIONS ===== */
+        .tool-section {
+            display: none;
+        }
+
+        .tool-section.active {
+            display: block;
+        }
+
+        /* ===== CARDS & LAYOUT ===== */
+        .card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        /* ===== FORMS & INPUTS ===== */
+        textarea, input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            background: var(--bg-white);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        textarea:focus, input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* ===== BUTTONS ===== */
+        button {
+            padding: 0.65rem 1.25rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--bg-light);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-danger {
+            background: #DC2626;
+        }
+
+        /* ===== STATS & RESULTS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-box {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* ===== OUTPUT BOX ===== */
+        .output-box {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            word-break: break-all;
+            min-height: 80px;
+        }
+
+        /* ===== UTILITY CLASSES ===== */
+        .flex-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .mt-1 { margin-top: 1rem; }
+        .mt-2 { margin-top: 1.5rem; }
+
+        .text-xs { font-size: 0.75rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-muted { color: var(--text-secondary); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .tab-btn {
+                min-width: 100px;
+                font-size: 0.8rem;
+                padding: 0.75rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ===== HEADER ===== -->
+        <div class="header">
+            <a href="/" class="back-link">← Back to Tools</a>
+            <h1>Text Studio</h1>
+        </div>
+
+        <!-- ===== EXPLAINER ===== -->
+        <div class="explainer">
+            <h3>What This Does</h3>
+            <p>
+                Six text tools in one place: count words and characters, convert between cases (UPPER, lower, Title, camelCase), 
+                sort lines alphabetically, remove duplicates, clean whitespace, and find & replace text. 
+                All runs in your browser—nothing sent anywhere.
+            </p>
+        </div>
+
+        <!-- ===== TABS ===== -->
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchTab('counter')">Counter</button>
+            <button class="tab-btn" onclick="switchTab('case')">Case</button>
+            <button class="tab-btn" onclick="switchTab('sort')">Sort & Dedupe</button>
+            <button class="tab-btn" onclick="switchTab('whitespace')">Whitespace</button>
+            <button class="tab-btn" onclick="switchTab('findreplace')">Find & Replace</button>
+        </div>
+
+        <!-- ===== TAB 1: COUNTER ===== -->
+        <div id="counter" class="tool-section active">
+            <div class="card">
+                <div class="card-title">Word & Character Counter</div>
+                <textarea id="counter-input" oninput="runCounter()" placeholder="Paste or type text here..."></textarea>
+                
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">Words</div>
+                        <div class="stat-value" id="counter-words">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Characters</div>
+                        <div class="stat-value" id="counter-chars">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Chars (no spaces)</div>
+                        <div class="stat-value" id="counter-chars-no-space">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Lines</div>
+                        <div class="stat-value" id="counter-lines">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Paragraphs</div>
+                        <div class="stat-value" id="counter-paragraphs">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Read Time</div>
+                        <div class="stat-value" id="counter-readtime">0s</div>
+                    </div>
+                </div>
+
+                <div class="flex-row mt-2">
+                    <button onclick="copyToClipboard('counter-input')">Copy</button>
+                    <button class="btn-secondary" onclick="clearField('counter-input')">Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TAB 2: CASE CONVERTER ===== -->
+        <div id="case" class="tool-section">
+            <div class="card">
+                <div class="card-title">Case Converter</div>
+                <div class="flex-col">
+                    <label class="text-sm text-muted">Input Text</label>
+                    <textarea id="case-input" oninput="runCase()" placeholder="Enter text..."></textarea>
+                </div>
+
+                <div class="flex-row mt-1">
+                    <button onclick="convertCase('upper')">UPPERCASE</button>
+                    <button onclick="convertCase('lower')">lowercase</button>
+                    <button onclick="convertCase('title')">Title Case</button>
+                    <button onclick="convertCase('sentence')">Sentence case</button>
+                    <button onclick="convertCase('camel')">camelCase</button>
+                    <button onclick="convertCase('snake')">snake_case</button>
+                    <button onclick="convertCase('kebab')">kebab-case</button>
+                </div>
+
+                <div class="mt-2">
+                    <label class="text-sm text-muted">Output</label>
+                    <div class="output-box" id="case-output">— Output appears here —</div>
+                </div>
+
+                <div class="flex-row mt-2">
+                    <button onclick="copyToClipboard('case-output')">Copy Output</button>
+                    <button class="btn-secondary" onclick="clearField('case-input')">Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TAB 3: SORT & DEDUPE ===== -->
+        <div id="sort" class="tool-section">
+            <div class="card">
+                <div class="card-title">Sort & Deduplicate Lines</div>
+                <div class="flex-col">
+                    <label class="text-sm text-muted">Input (one item per line)</label>
+                    <textarea id="sort-input" placeholder="Line 1&#10;Line 2&#10;Line 3..."></textarea>
+                </div>
+
+                <div class="flex-row mt-1">
+                    <button onclick="runSort('asc')">Sort A→Z</button>
+                    <button onclick="runSort('desc')">Sort Z→A</button>
+                    <button onclick="runSort('length-asc')">By Length ↑</button>
+                    <button onclick="runSort('length-desc')">By Length ↓</button>
+                    <button onclick="runSort('dedupe')">Remove Duplicates</button>
+                    <button onclick="runSort('shuffle')">Shuffle</button>
+                </div>
+
+                <div class="mt-2">
+                    <label class="text-sm text-muted">Output</label>
+                    <textarea id="sort-output" readonly></textarea>
+                </div>
+
+                <div class="flex-row mt-2">
+                    <button onclick="copyToClipboard('sort-output')">Copy Output</button>
+                    <button class="btn-secondary" onclick="clearField('sort-input')">Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TAB 4: WHITESPACE ===== -->
+        <div id="whitespace" class="tool-section">
+            <div class="card">
+                <div class="card-title">Whitespace Cleaner</div>
+                <div class="flex-col">
+                    <label class="text-sm text-muted">Input Text</label>
+                    <textarea id="ws-input" placeholder="Text with extra spaces, tabs, or blank lines..."></textarea>
+                </div>
+
+                <div class="flex-row mt-1">
+                    <button onclick="runWhitespace('trim')">Trim Edges</button>
+                    <button onclick="runWhitespace('normalize')">Normalize Spaces</button>
+                    <button onclick="runWhitespace('remove-blank')">Remove Blank Lines</button>
+                    <button onclick="runWhitespace('remove-all')">Remove All Spaces</button>
+                    <button onclick="runWhitespace('tab-to-space')">Tabs → 4 Spaces</button>
+                </div>
+
+                <div class="mt-2">
+                    <label class="text-sm text-muted">Output</label>
+                    <textarea id="ws-output" readonly></textarea>
+                </div>
+
+                <div class="flex-row mt-2">
+                    <button onclick="copyToClipboard('ws-output')">Copy Output</button>
+                    <button class="btn-secondary" onclick="clearField('ws-input')">Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TAB 5: FIND & REPLACE ===== -->
+        <div id="findreplace" class="tool-section">
+            <div class="card">
+                <div class="card-title">Find & Replace</div>
+                
+                <div class="flex-col">
+                    <label class="text-sm text-muted">Input Text</label>
+                    <textarea id="fr-input" placeholder="Text to search in..."></textarea>
+                </div>
+
+                <div class="flex-row mt-1">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label class="text-sm text-muted">Find</label>
+                        <input id="fr-find" type="text" placeholder="Search term..." oninput="runFindReplace()">
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label class="text-sm text-muted">Replace With</label>
+                        <input id="fr-replace" type="text" placeholder="Replacement..." oninput="runFindReplace()">
+                    </div>
+                </div>
+
+                <div class="flex-row mt-1">
+                    <label style="display: flex; gap: 0.5rem; align-items: center; flex: 1;">
+                        <input type="checkbox" id="fr-regex" oninput="runFindReplace()">
+                        <span class="text-sm">Use Regex</span>
+                    </label>
+                    <label style="display: flex; gap: 0.5rem; align-items: center; flex: 1;">
+                        <input type="checkbox" id="fr-case" checked oninput="runFindReplace()">
+                        <span class="text-sm">Case Sensitive</span>
+                    </label>
+                </div>
+
+                <div class="flex-row mt-1">
+                    <button onclick="runFindReplace()">Find & Replace All</button>
+                    <span class="text-sm text-muted" id="fr-count">0 replacements</span>
+                </div>
+
+                <div class="mt-2">
+                    <label class="text-sm text-muted">Output</label>
+                    <textarea id="fr-output" readonly></textarea>
+                </div>
+
+                <div class="flex-row mt-2">
+                    <button onclick="copyToClipboard('fr-output')">Copy Output</button>
+                    <button class="btn-secondary" onclick="clearField('fr-input')">Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== JAVASCRIPT ===== -->
+    <script>
+        // ===== TAB SWITCHING =====
+        function switchTab(tabName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.tool-section');
+            sections.forEach(s => s.classList.remove('active'));
+
+            // Show selected section
+            document.getElementById(tabName).classList.add('active');
+
+            // Update button states
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // ===== UTILITY: Copy to Clipboard =====
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.value || element.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const original = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => btn.textContent = original, 2000);
+            });
+        }
+
+        // ===== UTILITY: Clear Field =====
+        function clearField(elementId) {
+            document.getElementById(elementId).value = '';
+            document.getElementById(elementId).dispatchEvent(new Event('input'));
+        }
+
+        // ===== COUNTER: Count Words, Chars, Lines, etc. =====
+        function runCounter() {
+            const input = document.getElementById('counter-input').value;
+            
+            // Count words (split by whitespace)
+            const words = input.trim() ? input.trim().split(/\s+/).length : 0;
+            
+            // Count characters (with and without spaces)
+            const chars = input.length;
+            const charsNoSpace = input.replace(/\s/g, '').length;
+            
+            // Count lines
+            const lines = input.trim() ? input.split(/\n/).length : 0;
+            
+            // Count paragraphs (double line break = new paragraph)
+            const paragraphs = input.trim() ? input.split(/\n\n+/).length : 0;
+            
+            // Estimate reading time (avg 200 words per minute)
+            const readTime = Math.ceil(words / 200) || 0;
+            const readTimeText = readTime === 0 ? '< 1m' : readTime + 'm';
+
+            // Update display
+            document.getElementById('counter-words').textContent = words;
+            document.getElementById('counter-chars').textContent = chars;
+            document.getElementById('counter-chars-no-space').textContent = charsNoSpace;
+            document.getElementById('counter-lines').textContent = lines;
+            document.getElementById('counter-paragraphs').textContent = paragraphs;
+            document.getElementById('counter-readtime').textContent = readTimeText;
+        }
+
+        // ===== CASE CONVERTER: Convert Text to Different Cases =====
+        function convertCase(caseType) {
+            const input = document.getElementById('case-input').value;
+            let output = '';
+
+            switch(caseType) {
+                case 'upper':
+                    output = input.toUpperCase();
+                    break;
+                case 'lower':
+                    output = input.toLowerCase();
+                    break;
+                case 'title':
+                    // Title Case: capitalize first letter of each word
+                    output = input.replace(/\b\w/g, char => char.toUpperCase());
+                    break;
+                case 'sentence':
+                    // Sentence case: capitalize first letter, rest lowercase
+                    output = input.toLowerCase();
+                    output = output.charAt(0).toUpperCase() + output.slice(1);
+                    break;
+                case 'camel':
+                    // camelCase: first word lowercase, rest title
+                    output = input
+                        .replace(/\s+/g, ' ')
+                        .trim()
+                        .split(' ')
+                        .map((word, i) => i === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                        .join('');
+                    break;
+                case 'snake':
+                    // snake_case: lowercase with underscores
+                    output = input
+                        .replace(/\s+/g, '_')
+                        .replace(/[^a-zA-Z0-9_]/g, '')
+                        .toLowerCase();
+                    break;
+                case 'kebab':
+                    // kebab-case: lowercase with hyphens
+                    output = input
+                        .replace(/\s+/g, '-')
+                        .replace(/[^a-zA-Z0-9-]/g, '')
+                        .toLowerCase();
+                    break;
+            }
+
+            document.getElementById('case-output').textContent = output;
+        }
+
+        function runCase() {
+            // Live update on input
+            convertCase('upper'); // Default to show something
+        }
+
+        // ===== SORT: Sort Lines, Remove Duplicates, Shuffle =====
+        function runSort(mode) {
+            const input = document.getElementById('sort-input').value;
+            let lines = input.split('\n').map(line => line.trim()).filter(line => line);
+
+            switch(mode) {
+                case 'asc':
+                    lines.sort();
+                    break;
+                case 'desc':
+                    lines.sort().reverse();
+                    break;
+                case 'length-asc':
+                    lines.sort((a, b) => a.length - b.length);
+                    break;
+                case 'length-desc':
+                    lines.sort((a, b) => b.length - a.length);
+                    break;
+                case 'dedupe':
+                    // Remove duplicates (keep first occurrence)
+                    lines = [...new Set(lines)];
+                    break;
+                case 'shuffle':
+                    // Fisher-Yates shuffle
+                    for (let i = lines.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [lines[i], lines[j]] = [lines[j], lines[i]];
+                    }
+                    break;
+            }
+
+            document.getElementById('sort-output').value = lines.join('\n');
+        }
+
+        // ===== WHITESPACE: Clean Whitespace =====
+        function runWhitespace(mode) {
+            const input = document.getElementById('ws-input').value;
+            let output = '';
+
+            switch(mode) {
+                case 'trim':
+                    // Trim leading/trailing whitespace from entire text and each line
+                    output = input.split('\n').map(line => line.trim()).join('\n').trim();
+                    break;
+                case 'normalize':
+                    // Normalize multiple spaces to single space, remove excess blank lines
+                    output = input
+                        .replace(/[ \t]+/g, ' ')
+                        .replace(/\n\n+/g, '\n')
+                        .trim();
+                    break;
+                case 'remove-blank':
+                    // Remove completely blank lines
+                    output = input.split('\n').filter(line => line.trim()).join('\n');
+                    break;
+                case 'remove-all':
+                    // Remove all whitespace
+                    output = input.replace(/\s/g, '');
+                    break;
+                case 'tab-to-space':
+                    // Convert tabs to 4 spaces
+                    output = input.replace(/\t/g, '    ');
+                    break;
+            }
+
+            document.getElementById('ws-output').value = output;
+        }
+
+        // ===== FIND & REPLACE: Search and Replace Text =====
+        function runFindReplace() {
+            const input = document.getElementById('fr-input').value;
+            const find = document.getElementById('fr-find').value;
+            const replace = document.getElementById('fr-replace').value;
+            const useRegex = document.getElementById('fr-regex').checked;
+            const caseSensitive = document.getElementById('fr-case').checked;
+
+            if (!find) {
+                document.getElementById('fr-output').value = input;
+                document.getElementById('fr-count').textContent = '0 replacements';
+                return;
+            }
+
+            let output = input;
+            let count = 0;
+
+            try {
+                if (useRegex) {
+                    // Use regex for replacement
+                    const flags = caseSensitive ? 'g' : 'gi';
+                    const regex = new RegExp(find, flags);
+                    const matches = input.match(regex);
+                    count = matches ? matches.length : 0;
+                    output = input.replace(regex, replace);
+                } else {
+                    // Simple string replacement (case-sensitive or insensitive)
+                    const parts = input.split(find);
+                    count = parts.length - 1;
+                    
+                    if (!caseSensitive) {
+                        // Case-insensitive: use regex with i flag
+                        const regex = new RegExp(find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                        const matches = input.match(regex);
+                        count = matches ? matches.length : 0;
+                        output = input.replace(regex, replace);
+                    } else {
+                        output = input.split(find).join(replace);
+                    }
+                }
+            } catch (e) {
+                document.getElementById('fr-count').textContent = '⚠ Invalid regex';
+                return;
+            }
+
+            document.getElementById('fr-output').value = output;
+            document.getElementById('fr-count').textContent = count + ' ' + (count === 1 ? 'replacement' : 'replacements');
+        }
+    </script>
+</body>
+</html>
