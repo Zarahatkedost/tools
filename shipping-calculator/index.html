@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shipping calculator · Sahil's tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     THEME — pure black & white, one tiny accent (same as unit converter)
+     ============================================================ */
+  :root{
+    --bg:#FFFFFF; --ink:#0A0A0A; --line:#E4E4E4; --line2:#CFCFCF;
+    --muted:#6B6B6B; --card:#FAFAFA; --accent:#0A0A0A; --on-accent:#FFFFFF;
+    --ok:#1D7D53; --radius:12px; --ctrl:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:840px;margin:0 auto;padding:20px 20px 64px;}
+  header.site{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 22px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;}
+  .brand .mark{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;}
+  .brand a{color:inherit;text-decoration:none;}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);font-weight:500;}.privacy svg{width:15px;height:15px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);text-decoration:none;margin-bottom:14px;}.back svg{width:15px;height:15px;}.back:hover{color:var(--ink);}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,44px);letter-spacing:-0.02em;margin:0 0 6px;}
+  .sub{font-size:15px;color:var(--muted);margin:0 0 20px;}
+  .about{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:22px;font-size:13.5px;color:var(--muted);}
+  .about b{color:var(--ink);font-weight:600;}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px;}
+  .panel h2{font-family:'Fraunces',serif;font-weight:600;font-size:19px;margin-bottom:4px;}
+  .panel .phelp{font-size:13px;color:var(--muted);margin-bottom:16px;}
+
+  .toolbar{display:flex;gap:14px;flex-wrap:wrap;align-items:end;margin-bottom:16px;}
+  .fieldlet{display:flex;flex-direction:column;gap:5px;}
+  label.lbl{font-size:11.5px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:0.03em;}
+  input[type=text],input[type=number],select{font-family:'Inter';font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:var(--ctrl);padding:9px 11px;transition:border-color .15s,box-shadow .15s;}
+  input:focus,select:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(10,10,10,0.07);}
+  select{cursor:pointer;}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{text-align:left;font-weight:500;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:0.03em;padding:6px 6px;border-bottom:1px solid var(--line);}
+  td{padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  td input{width:100%;min-width:52px;text-align:center;padding:8px 6px;}
+  td.desc input{text-align:left;}
+  td.num{text-align:right;font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+  .delrow{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;border-radius:6px;}
+  .delrow:hover{color:#B23B2E;background:#f4ece9;}
+  .delrow svg{width:15px;height:15px;display:block;}
+
+  .btn{font-family:'Inter';font-size:13.5px;font-weight:500;padding:9px 14px;border-radius:var(--ctrl);cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:all .15s;}
+  .btn:hover{background:#F0F0F0;}
+  .btn.dark{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .btn.dark:hover{opacity:0.88;}
+  .btn svg{width:15px;height:15px;}
+
+  .totals{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px;}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:var(--ctrl);padding:14px;text-align:center;}
+  .stat .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.03em;}
+  .stat .v{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500;margin-top:4px;}
+  .stat.hl{background:var(--ink);color:#fff;}
+  .stat.hl .k{color:#bbb;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:560px){.grid2{grid-template-columns:1fr;}}
+  .feeline{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;}
+  .feeline:last-child{border-bottom:none;}
+  .feeline .fl-in{width:130px;text-align:right;}
+  .grandtotal{margin-top:14px;padding:16px;background:var(--ink);color:#fff;border-radius:var(--ctrl);display:flex;justify-content:space-between;align-items:center;}
+  .grandtotal .k{font-size:13px;color:#bbb;}
+  .grandtotal .v{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:500;}
+
+  .qnote{background:#fff;border:1px dashed var(--line2);border-radius:var(--ctrl);padding:12px 14px;font-size:12.5px;color:var(--muted);margin-top:14px;}
+  .qnote b{color:var(--ink);}
+  .foot{margin-top:34px;font-size:12.5px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <div class="brand"><span class="mark">S</span><a href="/">sahil's tools</a></div>
+    <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Runs in your browser</span>
+  </header>
+  <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>All tools</a>
+
+  <h1>Shipping calculator</h1>
+  <p class="sub">Work out shipment volume, chargeable weight, and an estimated landed cost.</p>
+
+  <div class="about">
+    <b>What this does.</b> Add each box in your shipment (length, width, height, quantity, actual weight). The tool works out the <b>total volume (CBM)</b>, the <b>volumetric weight</b> (size converted to a billed weight), and the <b>chargeable weight</b> — the higher of actual vs. volumetric, which is what carriers actually bill. Then it estimates a <b>landed cost</b> from goods value, customs duty, your margin, and government fees. The size &amp; weight maths are exact and work anywhere; the cost figures are estimates you type in and can edit freely.
+  </div>
+
+  <!-- ============================================================
+       SECTION 1 — SHIPMENT SIZE & WEIGHT (generic, exact)
+       ============================================================ -->
+  <div class="panel">
+    <h2>1 · Shipment size &amp; weight</h2>
+    <p class="phelp">Add a row per box type. Dimensions and weight use the units you pick below.</p>
+
+    <div class="toolbar">
+      <div class="fieldlet">
+        <label class="lbl">Units</label>
+        <select id="units">
+          <option value="metric">Centimeters + kg</option>
+          <option value="imperial">Inches + lb</option>
+        </select>
+      </div>
+      <div class="fieldlet">
+        <label class="lbl">Volumetric divisor</label>
+        <select id="divisor">
+          <option value="5000">Air freight — 5000</option>
+          <option value="6000">Courier / Express — 6000</option>
+          <option value="4000">Road / LCL — 4000</option>
+          <option value="3000">Road (some) — 3000</option>
+          <option value="custom">Custom…</option>
+        </select>
+      </div>
+      <div class="fieldlet" id="customDivWrap" style="display:none;">
+        <label class="lbl">Custom divisor</label>
+        <input type="number" id="customDiv" value="5000" style="width:110px;">
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:24%;">Box / item</th>
+          <th>L</th><th>W</th><th>H</th>
+          <th>Qty</th>
+          <th>Wt/box</th>
+          <th class="num">CBM</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+
+    <div style="margin-top:14px;">
+      <button class="btn" id="addRow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add box</button>
+    </div>
+
+    <div class="totals">
+      <div class="stat"><div class="k">Total CBM</div><div class="v" id="tCbm">0</div></div>
+      <div class="stat"><div class="k">Actual weight</div><div class="v" id="tActual">0</div></div>
+      <div class="stat"><div class="k">Volumetric weight</div><div class="v" id="tVol">0</div></div>
+      <div class="stat hl"><div class="k">Chargeable weight</div><div class="v" id="tCharge">0</div></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION 2 — COST ESTIMATE (editable, Qatar preset)
+       Two modes: Detailed cargo (itemized) OR Air easy-rate (% of value)
+       ============================================================ -->
+  <div class="panel">
+    <h2>2 · Cost estimate</h2>
+    <p class="phelp">Pick how you want to estimate. All amounts are yours to edit. Currency is a label only — the tool doesn't convert money.</p>
+
+    <div class="toolbar">
+      <div class="fieldlet">
+        <label class="lbl">Estimate mode</label>
+        <select id="costMode">
+          <option value="cargo">Detailed cargo (sea / full freight)</option>
+          <option value="air">Air easy-rate (small / medium)</option>
+        </select>
+      </div>
+      <div class="fieldlet">
+        <label class="lbl">Currency</label>
+        <select id="currency">
+          <option value="QAR">QAR — Qatari Riyal</option>
+          <option value="USD">USD — US Dollar</option>
+          <option value="EUR">EUR — Euro</option>
+          <option value="GBP">GBP — British Pound</option>
+          <option value="AED">AED — UAE Dirham</option>
+          <option value="INR">INR — Indian Rupee</option>
+          <option value="SAR">SAR — Saudi Riyal</option>
+        </select>
+      </div>
+      <div class="fieldlet">
+        <label class="lbl">Goods / cargo value</label>
+        <input type="number" id="goodsValue" value="10000">
+      </div>
+    </div>
+
+    <!-- ---- DETAILED CARGO MODE ---- -->
+    <div id="mode-cargo">
+      <div class="feeline">
+        <span>Customs duty <span style="color:var(--muted);">(<input type="number" id="dutyPct" value="5" style="width:52px;text-align:center;padding:4px;"> % of value)</span></span>
+        <span class="num" id="dutyAmt">0</span>
+      </div>
+      <div class="feeline">
+        <span>Your margin <span style="color:var(--muted);">(<input type="number" id="marginPct" value="5" style="width:52px;text-align:center;padding:4px;"> % of value)</span></span>
+        <span class="num" id="marginAmt">0</span>
+      </div>
+      <div class="feeline">
+        <span>Port clearance fee <span style="color:var(--muted);">(sea ~450 · air ~750 QAR)</span></span>
+        <input type="number" class="fl-in" id="feePort" value="450">
+      </div>
+      <div class="feeline">
+        <span>Boat legalization</span>
+        <input type="number" class="fl-in" id="feeLegal" value="1000">
+      </div>
+      <div class="feeline">
+        <span>Chamber stamp</span>
+        <input type="number" class="fl-in" id="feeStamp" value="800">
+      </div>
+      <div class="feeline">
+        <span>Other paperwork / government fees</span>
+        <input type="number" class="fl-in" id="feeOther" value="1000">
+      </div>
+    </div>
+
+    <!-- ---- AIR EASY-RATE MODE ---- -->
+    <div id="mode-air" style="display:none;">
+      <div class="feeline">
+        <span>Easy rate <span style="color:var(--muted);">(<input type="number" id="airPct" value="10" style="width:52px;text-align:center;padding:4px;"> % of cargo value — typically 10–15%)</span></span>
+        <span class="num" id="airAmt">0</span>
+      </div>
+      <div class="feeline">
+        <span>Port / airport clearance fee <span style="color:var(--muted);">(air ~750 QAR)</span></span>
+        <input type="number" class="fl-in" id="airPort" value="750">
+      </div>
+      <p class="qnote" style="margin-top:12px;">
+        <b>Air easy-rate.</b> For small/medium air shipments, airport fees + customs are often estimated as a flat <b>10–15% of cargo value</b> (this <b>replaces</b> itemized duty and government paperwork). <b>Transport/freight is not included</b> — add it separately. Default is 10%; raise toward 15% for the upper bound. Adjust the % for your actual rate.
+      </p>
+    </div>
+
+    <div class="grandtotal">
+      <span class="k" id="grandLabel">Estimated added cost</span>
+      <span class="v"><span id="grandCur">QAR</span> <span id="grandTotal">0</span></span>
+    </div>
+
+    <div class="qnote">
+      <b>Qatar note.</b> Detailed-mode defaults reflect typical Qatar sea-freight paperwork: port clearance ~450 QAR (sea) / ~750 QAR (air), legalization ~1000, chamber stamp ~800, plus other fees — landing roughly <b>2,800–3,800 QAR</b> for sea. Customs duty is commonly 5% of value for most goods. Logistics providers usually bundle port clearance into their charge. <b>Other countries differ</b> — edit every field to match your route.
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION 3 — INCOTERMS REFERENCE (explanation, not calculation)
+       ============================================================ -->
+  <div class="panel">
+    <h2>3 · Incoterms — who pays for what</h2>
+    <p class="phelp">Incoterms are the standard rules that define where the seller's responsibility ends and the buyer's begins. They don't produce a number — they tell you which costs and risks each side carries. Common ones:</p>
+    <div id="incoterms"></div>
+  </div>
+
+  <p class="foot">Made for sahilshaikh.org · runs entirely in your browser</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+
+  /* ============================================================
+     UNIT HELPERS
+     CBM (cubic meters) always comes out in m³ regardless of input unit.
+       - metric: dimensions in cm  → divide each by 100 to get meters
+       - imperial: dimensions in inch → 1 inch = 0.0254 m
+     Volumetric weight uses the classic freight formula:
+       (L * W * H in CM) / divisor  = kg      [metric]
+       (L * W * H in INCH) / divisor = lb      [imperial]
+     ============================================================ */
+  function unitMode(){ return $("units").value; }         // "metric" | "imperial"
+  function weightUnit(){ return unitMode()==="metric" ? "kg" : "lb"; }
+  function dimUnit(){ return unitMode()==="metric" ? "cm" : "in"; }
+
+  function getDivisor(){
+    var v=$("divisor").value;
+    if(v==="custom") return parseFloat($("customDiv").value)||5000;
+    return parseFloat(v);
+  }
+
+  /* ---- CBM for one box (returns cubic meters) ---- */
+  function boxCbm(l,w,h){
+    if(unitMode()==="metric"){
+      return (l/100)*(w/100)*(h/100);        // cm → m
+    } else {
+      var m=0.0254;                           // inch → m
+      return (l*m)*(w*m)*(h*m);
+    }
+  }
+
+  /* ---- volumetric weight for one box (kg or lb, matching the unit mode) ---- */
+  function boxVolWeight(l,w,h){
+    return (l*w*h)/getDivisor();              // dims already in cm or inch
+  }
+
+  /* ============================================================
+     ROWS — each box type is a row the team fills in.
+     ============================================================ */
+  var rows=[];
+  var nextId=1;
+
+  function addRow(desc,l,w,h,q,wt){
+    rows.push({id:nextId++, desc:desc||"", l:l||"", w:w||"", h:h||"", q:q||1, wt:wt||""});
+    renderRows();
+    recalc();
+  }
+
+  function renderRows(){
+    var tb=$("rows"); tb.innerHTML="";
+    rows.forEach(function(r,idx){
+      var tr=document.createElement("tr");
+      tr.innerHTML=
+        '<td class="desc"><input type="text" data-i="'+idx+'" data-k="desc" value="'+escAttr(r.desc)+'" placeholder="e.g. Carton A"></td>'+
+        '<td><input type="number" data-i="'+idx+'" data-k="l" value="'+r.l+'"></td>'+
+        '<td><input type="number" data-i="'+idx+'" data-k="w" value="'+r.w+'"></td>'+
+        '<td><input type="number" data-i="'+idx+'" data-k="h" value="'+r.h+'"></td>'+
+        '<td><input type="number" data-i="'+idx+'" data-k="q" value="'+r.q+'"></td>'+
+        '<td><input type="number" data-i="'+idx+'" data-k="wt" value="'+r.wt+'"></td>'+
+        '<td class="num" data-cbm="'+idx+'">0</td>'+
+        '<td><button class="delrow" data-del="'+idx+'" aria-label="remove row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></td>';
+      tb.appendChild(tr);
+    });
+    // wire inputs
+    tb.querySelectorAll("input").forEach(function(inp){
+      inp.addEventListener("input",function(){
+        var i=+this.dataset.i, k=this.dataset.k;
+        rows[i][k]=this.value;
+        recalc();
+      });
+    });
+    tb.querySelectorAll("[data-del]").forEach(function(b){
+      b.onclick=function(){ rows.splice(+this.dataset.del,1); renderRows(); recalc(); };
+    });
+  }
+  function escAttr(s){return (s||"").replace(/"/g,"&quot;");}
+
+  /* ============================================================
+     RECALCULATE totals whenever anything changes
+     ============================================================ */
+  function recalc(){
+    var totCbm=0, totActual=0, totVol=0;
+    rows.forEach(function(r,idx){
+      var l=parseFloat(r.l)||0, w=parseFloat(r.w)||0, h=parseFloat(r.h)||0;
+      var q=parseInt(r.q)||0, wt=parseFloat(r.wt)||0;
+      var cbmEach=boxCbm(l,w,h);
+      var volEach=boxVolWeight(l,w,h);
+      totCbm    += cbmEach*q;
+      totActual += wt*q;
+      totVol    += volEach*q;
+      var cell=document.querySelector('[data-cbm="'+idx+'"]');
+      if(cell) cell.textContent=(cbmEach*q).toFixed(3);
+    });
+
+    // chargeable = the greater of actual vs volumetric (that's how carriers bill)
+    var chargeable=Math.max(totActual,totVol);
+    var wu=weightUnit();
+
+    $("tCbm").textContent=totCbm.toFixed(3);
+    $("tActual").textContent=totActual.toFixed(1)+" "+wu;
+    $("tVol").textContent=totVol.toFixed(1)+" "+wu;
+    $("tCharge").textContent=chargeable.toFixed(1)+" "+wu;
+
+    recalcCost();
+  }
+
+  /* ============================================================
+     COST ESTIMATE — two modes, all editable, currency is just a label
+       cargo mode: duty + margin + port + legalization + stamp + other
+       air mode:   easy-rate % of value + airport clearance
+     ============================================================ */
+  function recalcCost(){
+    var cur=$("currency").value;
+    var goods=parseFloat($("goodsValue").value)||0;
+    var mode=$("costMode").value;
+    var total;
+
+    if(mode==="air"){
+      // AIR EASY-RATE: flat % of cargo value (replaces duty+paperwork) + airport clearance
+      var airPct=parseFloat($("airPct").value)||0;
+      var airRate=goods*(airPct/100);
+      var airPort=parseFloat($("airPort").value)||0;
+      total=airRate+airPort;
+      $("airAmt").textContent=cur+" "+airRate.toFixed(2);
+      $("grandLabel").textContent="Estimated fees (air, excl. transport)";
+    } else {
+      // DETAILED CARGO: itemized
+      var duty   = goods*((parseFloat($("dutyPct").value)||0)/100);
+      var margin = goods*((parseFloat($("marginPct").value)||0)/100);
+      var port   = parseFloat($("feePort").value)||0;
+      var legal  = parseFloat($("feeLegal").value)||0;
+      var stamp  = parseFloat($("feeStamp").value)||0;
+      var other  = parseFloat($("feeOther").value)||0;
+      total = duty + margin + port + legal + stamp + other;
+      $("dutyAmt").textContent   = cur+" "+duty.toFixed(2);
+      $("marginAmt").textContent = cur+" "+margin.toFixed(2);
+      $("grandLabel").textContent="Estimated added cost";
+    }
+
+    $("grandCur").textContent  = cur;
+    $("grandTotal").textContent= total.toFixed(2);
+  }
+
+  /* ---- switch between cargo and air estimate modes ---- */
+  function applyCostMode(){
+    var air = $("costMode").value==="air";
+    $("mode-air").style.display  = air ? "block" : "none";
+    $("mode-cargo").style.display= air ? "none"  : "block";
+    recalcCost();
+  }
+
+  /* ============================================================
+     INCOTERMS REFERENCE — plain-English, no calculation
+     ============================================================ */
+  var INCOTERMS=[
+    ["EXW","Ex Works","Seller just makes goods available at their door. Buyer pays and handles everything from there — pickup, export, freight, import, delivery. Most cost/risk on the buyer."],
+    ["FOB","Free On Board","Seller covers export clearance and getting goods onto the ship. Risk passes to buyer once loaded. Buyer pays sea freight, insurance, and import side. (Sea only.)"],
+    ["CIF","Cost, Insurance & Freight","Seller pays freight and insurance to the destination port. Risk still passes at the origin port. Buyer handles import clearance, duty, and onward delivery. (Sea only.)"],
+    ["CFR","Cost & Freight","Like CIF but seller does not pay insurance — only freight to destination port. Buyer arranges their own insurance."],
+    ["DAP","Delivered At Place","Seller delivers to the agreed destination, ready for unloading. Buyer handles import clearance and duty."],
+    ["DDP","Delivered Duty Paid","Seller covers everything — freight, import clearance, duty, delivery to the door. Most cost/risk on the seller; buyer just receives."]
+  ];
+  function renderIncoterms(){
+    var host=$("incoterms");
+    host.innerHTML=INCOTERMS.map(function(t){
+      return '<div style="padding:12px 0;border-bottom:1px solid var(--line);">'+
+        '<div style="font-weight:600;font-size:14px;"><span style="font-family:\'JetBrains Mono\',monospace;background:var(--ink);color:#fff;padding:2px 7px;border-radius:5px;font-size:12px;margin-right:8px;">'+t[0]+'</span>'+t[1]+'</div>'+
+        '<div style="font-size:13px;color:var(--muted);margin-top:6px;">'+t[2]+'</div></div>';
+    }).join("");
+  }
+
+  /* ============================================================
+     WIRE UP controls
+     ============================================================ */
+  $("units").addEventListener("change",function(){ renderRows(); recalc(); });
+  $("divisor").addEventListener("change",function(){
+    $("customDivWrap").style.display = this.value==="custom" ? "flex" : "none";
+    recalc();
+  });
+  $("customDiv").addEventListener("input",recalc);
+  $("addRow").addEventListener("click",function(){ addRow(); });
+  $("costMode").addEventListener("change",applyCostMode);
+
+  ["currency","goodsValue","dutyPct","marginPct","feePort","feeLegal","feeStamp","feeOther","airPct","airPort"].forEach(function(id){
+    $(id).addEventListener("input",recalcCost);
+    $(id).addEventListener("change",recalcCost);
+  });
+
+  renderIncoterms();
+  applyCostMode();
+
+  /* ---- START with two example rows so the team sees the shape ---- */
+  addRow("Carton A",60,40,40,10,12);
+  addRow("Carton B",50,50,30,5,8);
+})();
+</script>
+</body>
+</html>

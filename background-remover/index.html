@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Background remover · Sahil's tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#F5F2EC;--ink:#1C1B19;--line:#DEDACF;--line2:#CBC6B8;--accent:#1F4FD8;--accent-ink:#15379a;--muted:#6E6A60;--card:#FCFAF6;--ok:#1D7D53;--warn:#B4611A;--radius:12px;--ctrl:10px;}
+  *{box-sizing:border-box;}html,body{margin:0;}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:720px;margin:0 auto;padding:20px 20px 64px;}
+  header.site{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 22px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;}
+  .brand .mark{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;}
+  .brand a{color:inherit;text-decoration:none;}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ok);font-weight:500;}.privacy svg{width:15px;height:15px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);text-decoration:none;margin-bottom:14px;}.back svg{width:15px;height:15px;}.back:hover{color:var(--ink);}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,44px);letter-spacing:-0.02em;margin:0 0 6px;}
+  .sub{font-size:15px;color:var(--muted);margin:0 0 24px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
+  .note{background:#FBF3E7;border:1px solid #EAD9BE;color:var(--warn);font-size:12.5px;border-radius:var(--ctrl);padding:10px 12px;margin-bottom:16px;}
+  .drop{border:1.5px dashed var(--line2);border-radius:var(--ctrl);padding:34px 20px;text-align:center;cursor:pointer;transition:all .15s;}
+  .drop:hover,.drop.over{background:#F3EFE6;border-color:var(--accent);}
+  .drop svg{width:34px;height:34px;color:var(--muted);}.drop p{margin:10px 0 0;font-size:14px;color:var(--muted);}
+  .stage{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+  @media(max-width:520px){.stage{grid-template-columns:1fr;}}
+  .cell{text-align:center;}
+  .imgbox{height:220px;border-radius:10px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;}
+  .imgbox.check{background-image:linear-gradient(45deg,#e2e2e2 25%,transparent 25%),linear-gradient(-45deg,#e2e2e2 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e2e2e2 75%),linear-gradient(-45deg,transparent 75%,#e2e2e2 75%);background-size:18px 18px;background-position:0 0,0 9px,9px -9px,-9px 0;}
+  .imgbox img{max-width:100%;max-height:100%;object-fit:contain;}
+  .clabel{font-size:12px;color:var(--muted);margin-top:6px;}
+  .btn{font-family:'Inter';font-size:14px;font-weight:500;padding:11px 16px;border-radius:var(--ctrl);cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:all .15s;}
+  .btn:hover{background:#F3EFE6;}.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}.btn.primary:hover{background:var(--accent-ink);}.btn svg{width:16px;height:16px;}.btn.full{width:100%;}.btn:disabled{opacity:.5;cursor:default;}
+  .dlrow{margin-top:16px;display:flex;gap:8px;}
+  .status{font-size:13px;color:var(--muted);margin-top:14px;text-align:center;min-height:18px;}
+  .foot{margin-top:34px;font-size:12.5px;color:var(--muted);text-align:center;}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--line2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <div class="brand"><span class="mark">S</span><a href="/">sahil's tools</a></div>
+    <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Runs on your device</span>
+  </header>
+  <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>All tools</a>
+  <h1>Background remover</h1>
+  <p class="sub">Remove the background from a photo, right in your browser. Nothing is uploaded — the AI runs on your own device.</p>
+
+  <div class="panel">
+    <div class="note">First run downloads a small AI model (a few MB), so give it a moment. Works great on clear subjects; very fine hair or fuzzy edges won't be perfect.</div>
+    <div class="drop" id="drop">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M8 8l4-4 4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+      <p>Drop a photo here or tap to choose</p>
+      <input type="file" id="file" accept="image/*" hidden>
+    </div>
+
+    <div class="stage" id="stage" style="display:none;">
+      <div class="cell"><div class="imgbox"><img id="origImg" alt="original"></div><div class="clabel">Original</div></div>
+      <div class="cell"><div class="imgbox check"><img id="outImg" alt="result"></div><div class="clabel">Background removed</div></div>
+    </div>
+
+    <p class="status" id="status"></p>
+
+    <div class="dlrow" id="dlrow" style="display:none;">
+      <button class="btn primary full" id="dl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Download PNG</button>
+      <button class="btn" id="reset">New image</button>
+    </div>
+  </div>
+  <p class="foot">Made for sahilshaikh.org · runs entirely in your browser</p>
+</div>
+
+<script type="module">
+  const $=(id)=>document.getElementById(id);
+  let outUrl=null, removeFn=null, loading=false;
+
+  async function ensureLib(){
+    if(removeFn) return removeFn;
+    $("status").innerHTML='<span class="spinner"></span>Loading AI model (first time only)…';
+    const mod=await import("https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/+esm");
+    removeFn=mod.removeBackground || mod.default;
+    return removeFn;
+  }
+
+  async function handle(file){
+    if(!file || !/^image\//.test(file.type)) return;
+    $("stage").style.display="grid";
+    $("dlrow").style.display="none";
+    $("origImg").src=URL.createObjectURL(file);
+    $("outImg").removeAttribute("src");
+    if(loading) return;
+    loading=true;
+    try{
+      const rb=await ensureLib();
+      $("status").innerHTML='<span class="spinner"></span>Removing background…';
+      const blob=await rb(file);
+      if(outUrl) URL.revokeObjectURL(outUrl);
+      outUrl=URL.createObjectURL(blob);
+      $("outImg").src=outUrl;
+      $("status").textContent="Done. If edges aren't perfect, try a photo with clearer separation from the background.";
+      $("dlrow").style.display="flex";
+      $("dl").onclick=()=>{ const a=document.createElement("a"); a.download=(file.name.replace(/\.[^.]+$/,"")||"image")+"-no-bg.png"; a.href=outUrl; a.click(); };
+    }catch(err){
+      $("status").textContent="Couldn't process this image. This tool needs a modern browser and an internet connection for the first model download. Please try again.";
+    }
+    loading=false;
+  }
+
+  const drop=$("drop");
+  drop.onclick=()=>$("file").click();
+  $("file").onchange=function(){ handle(this.files[0]); this.value=""; };
+  ["dragover","dragenter"].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add("over");}));
+  ["dragleave","drop"].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove("over");}));
+  drop.addEventListener("drop",ev=>{ev.preventDefault();handle(ev.dataTransfer.files[0]);});
+  $("reset").onclick=()=>{ $("stage").style.display="none"; $("dlrow").style.display="none"; $("status").textContent=""; };
+</script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sahil's tools · free, private, in your browser</title>
+<meta name="description" content="A collection of free tools that run entirely in your browser. No uploads, no sign-up, no server.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F2EC; --ink:#1C1B19; --line:#DEDACF; --line2:#CBC6B8;
+    --accent:#1F4FD8; --accent-ink:#15379a; --muted:#6E6A60; --card:#FCFAF6;
+    --ok:#1D7D53; --radius:14px; --ctrl:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1080px;margin:0 auto;padding:20px 20px 72px;}
+
+  header.site{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 6px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;letter-spacing:-0.01em;}
+  .brand .mark{width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;}
+  .brand a{color:inherit;text-decoration:none;}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ok);font-weight:500;}
+  .privacy svg{width:15px;height:15px;}
+
+  .hero{padding:44px 0 30px;max-width:40ch;}
+  .hero h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(38px,7vw,62px);line-height:0.98;letter-spacing:-0.03em;margin-bottom:14px;}
+  .hero h1 em{font-style:italic;color:var(--accent);}
+  .hero p{font-size:16px;color:var(--muted);}
+
+  .searchbar{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 22px;}
+  .searchfield{position:relative;flex:1;min-width:240px;}
+  .searchfield svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted);}
+  #search{width:100%;font-family:'Inter';font-size:15px;padding:13px 14px 13px 42px;border:1px solid var(--line2);border-radius:var(--ctrl);background:#fff;color:var(--ink);transition:border-color .15s,box-shadow .15s;}
+  #search:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(31,79,216,0.12);}
+
+  .cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:26px;}
+  .cat{font-family:'Inter';font-size:13px;font-weight:500;padding:8px 14px;border-radius:999px;border:1px solid var(--line2);background:#fff;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+  .cat:hover{background:#F3EFE6;color:var(--ink);}
+  .cat.on{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+
+  .catgroup{margin-bottom:30px;}
+  .catgroup h2{font-family:'Fraunces',serif;font-weight:600;font-size:20px;letter-spacing:-0.01em;margin-bottom:2px;display:flex;align-items:baseline;gap:10px;}
+  .catgroup h2 .count{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);font-weight:400;}
+  .catgroup .cdesc{font-size:13px;color:var(--muted);margin-bottom:14px;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:10px;transition:transform .16s,box-shadow .16s,border-color .16s;position:relative;}
+  .card:hover{transform:translateY(-2px);box-shadow:0 10px 22px -12px rgba(28,27,25,0.28);border-color:var(--line2);}
+  .card .ic{width:38px;height:38px;border-radius:10px;background:#EEF1FB;color:var(--accent);display:grid;place-items:center;}
+  .card .ic svg{width:20px;height:20px;}
+  .card .tt{font-weight:600;font-size:15px;letter-spacing:-0.01em;}
+  .card .ds{font-size:13px;color:var(--muted);line-height:1.5;}
+  .card .go{margin-top:auto;font-size:13px;font-weight:600;color:var(--accent);display:inline-flex;align-items:center;gap:5px;opacity:0;transform:translateX(-4px);transition:all .16s;}
+  .card:hover .go{opacity:1;transform:translateX(0);}
+  .card.soon{opacity:0.62;cursor:default;}
+  .card.soon:hover{transform:none;box-shadow:none;border-color:var(--line);}
+  .badge-soon{position:absolute;top:14px;right:14px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);background:#EFEBE1;padding:2px 7px;border-radius:6px;letter-spacing:0.03em;}
+
+  .noresult{padding:40px 0;text-align:center;color:var(--muted);font-size:15px;}
+
+  footer{margin-top:40px;padding-top:22px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--muted);}
+  footer a{color:var(--accent);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <div class="brand"><span class="mark">S</span><a href="/">sahil's tools</a></div>
+    <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>100% private — nothing leaves your device</span>
+  </header>
+
+  <div class="hero">
+    <h1>Free tools that run <em>in your browser</em>.</h1>
+    <p>No uploads, no sign-up, no server. Your files and text never leave your device. Pick a tool and go.</p>
+  </div>
+
+  <div class="searchbar">
+    <div class="searchfield">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="search" placeholder="Search tools…" autocomplete="off">
+    </div>
+  </div>
+
+  <div class="cats" id="cats"></div>
+
+  <div id="results"></div>
+
+  <footer>
+    <span>Made for sahilshaikh.org · everything runs in your browser</span>
+    <span id="toolcount"></span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ============================================================
+  //  TOOL REGISTRY — add a tool by adding one entry here.
+  //  { title, desc, cat, path, icon, live }
+  //  live:false shows a "soon" card (not clickable).
+  // ============================================================
+  var CATEGORIES = [
+    {id:"make",   name:"Make & share",   desc:"Create things to send, print, or scan."},
+    {id:"pdf",    name:"PDF & documents",desc:"Work with PDFs right in the browser."},
+    {id:"image",  name:"Images",         desc:"Resize, compress, and clean up pictures."},
+    {id:"text",   name:"Text",           desc:"Everyday text and writing helpers."},
+    {id:"convert",name:"Converters",     desc:"Turn one format into another."},
+    {id:"dev",    name:"Developer",      desc:"Small helpers for people who code."},
+    {id:"calc",   name:"Calculators",    desc:"Quick everyday math."},
+    {id:"time",   name:"Time",           desc:"Clocks, timers, and timezones."}
+  ];
+
+  var IC = {
+    qr:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M20 20v.01M17 20h.01M20 17h.01"/>',
+    id:'<rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="8" cy="10" r="2"/><path d="M6 16c0-1.5 1-2.5 2-2.5s2 1 2 2.5M14 9h4M14 13h4"/>',
+    scan:'<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M3 12h18"/>',
+    file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+    sign:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 15c2-2 3 1 5-1"/>',
+    photo:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',
+    eraser:'<path d="M20 20H7L3 16a2 2 0 0 1 0-3l9-9a2 2 0 0 1 3 0l5 5a2 2 0 0 1 0 3l-8 8"/>',
+    board:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h5M8 12h8M8 16h4"/>',
+    type:'<path d="M4 7V4h16v3M9 20h6M12 4v16"/>',
+    hash:'<path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/>',
+    json:'<path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1"/>',
+    key:'<circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.5 12.5 8-8M17 4l3 3M14 7l3 3"/>',
+    palette:'<circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 1 0 0 20 2 2 0 0 0 2-2v-1a2 2 0 0 1 2-2h2a4 4 0 0 0 4-4 10 10 0 0 0-10-9z"/>',
+    ruler:'<path d="M3 8l4-4 13 13-4 4z"/><path d="M7 8l1 1M10 11l1 1M13 14l1 1"/>',
+    percent:'<path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+  };
+
+  var TOOLS = [
+    // ============================================================
+    //  ALL 19 TOOLS — one line each. To add a tool later:
+    //  make a folder with index.html, then add one line here.
+    // ============================================================
+
+    // ---- Make & share ----
+    {title:"QR code generator", desc:"Make a QR from any link or text — pick colors, drop in a logo or center text.", cat:"make", path:"/qr-generator/", icon:"qr", live:true},
+    {title:"Contact card maker", desc:"Build a vCard with all your details and a shareable save-me link + QR.", cat:"make", path:"/contact-card/", icon:"id", live:true},
+    {title:"Code scanner", desc:"Read QR codes and barcodes with your camera, or by uploading an image.", cat:"make", path:"/scanner/", icon:"scan", live:true},
+    {title:"Poster maker", desc:"Quick posters and graphics — text, shapes, images, preset canvas sizes.", cat:"make", path:"/poster-maker/", icon:"board", live:true},
+
+    // ---- PDF & documents ----
+    {title:"PDF toolkit", desc:"Merge, reorder, rotate and delete pages, then download a fresh PDF.", cat:"pdf", path:"/pdf-toolkit/", icon:"file", live:true},
+
+    // ---- Images ----
+    {title:"Image compressor", desc:"Shrink and resize one image or a whole batch, download as a zip.", cat:"image", path:"/image-compressor/", icon:"photo", live:true},
+    {title:"Background remover", desc:"Cut out the background from a photo — the AI runs on your device.", cat:"image", path:"/background-remover/", icon:"eraser", live:true},
+
+    // ---- Text ----
+    {title:"Text studio", desc:"Counter, case converter, sort, dedupe, whitespace cleaner and find & replace in one.", cat:"text", path:"/text-studio/", icon:"type", live:true},
+
+    // ---- Converters ----
+    {title:"Unit converter", desc:"Length, weight, temperature, volume, area, speed and data in one place.", cat:"convert", path:"/unit-converter/", icon:"ruler", live:true},
+    {title:"Color studio", desc:"HEX, RGB and HSL conversion, WCAG contrast checker, and palette builder.", cat:"convert", path:"/color-studio/", icon:"palette", live:true},
+    {title:"Encoder / decoder", desc:"Base64, URL encoding, HTML entities and JWT decoding in one tool.", cat:"convert", path:"/encoder-decoder/", icon:"hash", live:true},
+    {title:"Data converters", desc:"Number bases, timestamps and other everyday data conversions.", cat:"convert", path:"/data-converters/", icon:"hash", live:true},
+
+    // ---- Developer ----
+    {title:"Dev tools", desc:"JSON formatter, regex tester, markdown preview and text diff.", cat:"dev", path:"/dev-tools/", icon:"json", live:true},
+    {title:"Crypto & ID", desc:"Secure passwords, passphrases and UUIDs — proper crypto randomness.", cat:"dev", path:"/crypto-id/", icon:"key", live:true},
+
+    // ---- Calculators ----
+    {title:"Shipping calculator", desc:"Multi-box CBM, volumetric & chargeable weight, plus an editable landed-cost estimate.", cat:"calc", path:"/shipping-calculator/", icon:"percent", live:true},
+    {title:"Petty cash tracker", desc:"Log expenses with running balance, then export to Excel or PDF.", cat:"calc", path:"/petty-cash/", icon:"percent", live:true},
+    {title:"Math studio", desc:"Percentages, tip splitter, compound interest, aspect ratio and roman numerals.", cat:"calc", path:"/math-studio/", icon:"percent", live:true},
+
+    // ---- Time ----
+    {title:"World clock", desc:"Live times worldwide with UTC pinned on top, plus a meeting-overlap planner.", cat:"time", path:"/world-clock/", icon:"clock", live:true},
+    {title:"Timers studio", desc:"Pomodoro, stopwatch with laps, and countdown — together in one place.", cat:"time", path:"/timers-studio/", icon:"clock", live:true},
+
+    // ---- Business (new batch) ----
+    {title:"Invoice generator", desc:"Line items, discount and tax, your logo — print a clean invoice to PDF.", cat:"calc", path:"/invoice-generator/", icon:"file", live:true},
+    {title:"Expense splitter", desc:"Split a bill with tax and tip — evenly or with different shares per person.", cat:"calc", path:"/expense-splitter/", icon:"percent", live:true},
+    {title:"CSV ↔ JSON", desc:"Convert spreadsheet data to JSON and back — quotes and commas handled properly.", cat:"convert", path:"/csv-json/", icon:"hash", live:true},
+    {title:"Phone formatter", desc:"Any number → international E.164 format, click-to-call and WhatsApp links.", cat:"convert", path:"/phone-formatter/", icon:"ruler", live:true},
+    {title:"EXIF remover", desc:"Strip hidden GPS location and camera metadata from photos before sharing.", cat:"image", path:"/exif-remover/", icon:"eraser", live:true},
+    {title:"Email validator", desc:"Clean a mailing list — format checks, typo catches, dedupe, export.", cat:"text", path:"/email-validator/", icon:"type", live:true},
+    {title:"Markdown → HTML", desc:"Live preview and clean, sanitized HTML you can copy or download.", cat:"dev", path:"/markdown-html/", icon:"json", live:true},
+    {title:"Password strength", desc:"Entropy-based strength check with estimated crack time — never leaves the page.", cat:"dev", path:"/password-strength/", icon:"key", live:true},
+
+    // ---- Planned ----
+    {title:"PDF fill & sign", desc:"Sign a PDF and type into flat forms — draw or type your signature.", cat:"pdf", icon:"sign", live:false}
+  ];
+
+  // ============================================================
+
+  var elCats=document.getElementById("cats");
+  var elResults=document.getElementById("results");
+  var elSearch=document.getElementById("search");
+  var elCount=document.getElementById("toolcount");
+  var activeCat="all", query="";
+
+  function svg(name){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(IC[name]||"")+'</svg>'; }
+
+  function renderCats(){
+    var html='<button class="cat on" data-c="all">All</button>';
+    CATEGORIES.forEach(function(c){
+      if(TOOLS.some(function(t){return t.cat===c.id;})){
+        html+='<button class="cat" data-c="'+c.id+'">'+c.name+'</button>';
+      }
+    });
+    elCats.innerHTML=html;
+    elCats.querySelectorAll(".cat").forEach(function(b){
+      b.onclick=function(){
+        activeCat=this.dataset.c;
+        elCats.querySelectorAll(".cat").forEach(function(x){x.classList.remove("on");});
+        this.classList.add("on");
+        render();
+      };
+    });
+  }
+
+  function cardHtml(t){
+    var inner=
+      '<div class="ic">'+svg(t.icon)+'</div>'+
+      '<div class="tt">'+t.title+'</div>'+
+      '<div class="ds">'+t.desc+'</div>';
+    if(t.live){
+      return '<a class="card" href="'+t.path+'">'+inner+'<span class="go">Open →</span></a>';
+    }
+    return '<div class="card soon"><span class="badge-soon">soon</span>'+inner+'</div>';
+  }
+
+  function render(){
+    var q=query.trim().toLowerCase();
+    var matched=TOOLS.filter(function(t){
+      var inCat=(activeCat==="all"||t.cat===activeCat);
+      var inQ=!q || (t.title+" "+t.desc).toLowerCase().indexOf(q)>-1;
+      return inCat && inQ;
+    });
+
+    if(!matched.length){
+      elResults.innerHTML='<div class="noresult">No tools match “'+escapeHtml(query)+'”. Try another word.</div>';
+      elCount.textContent="";
+      return;
+    }
+
+    var html="";
+    if(q){
+      // flat grid when searching
+      html='<div class="grid">'+matched.map(cardHtml).join("")+'</div>';
+    } else {
+      // grouped by category
+      CATEGORIES.forEach(function(c){
+        var group=matched.filter(function(t){return t.cat===c.id;});
+        if(!group.length) return;
+        html+='<div class="catgroup"><h2>'+c.name+' <span class="count">'+group.length+'</span></h2>'+
+              '<p class="cdesc">'+c.desc+'</p>'+
+              '<div class="grid">'+group.map(cardHtml).join("")+'</div></div>';
+      });
+    }
+    elResults.innerHTML=html;
+
+    var liveN=TOOLS.filter(function(t){return t.live;}).length;
+    elCount.textContent=liveN+" live · "+(TOOLS.length-liveN)+" coming soon";
+  }
+
+  function escapeHtml(s){return (s||"").replace(/[<>&]/g,function(c){return {"<":"&lt;",">":"&gt;","&":"&amp;"}[c];});}
+
+  elSearch.addEventListener("input",function(){ query=this.value; render(); });
+
+  renderCats();
+  render();
+})();
+</script>
+</body>
+</html>

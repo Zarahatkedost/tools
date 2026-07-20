@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World clock · Sahil's tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     THEME — pure black & white, one tiny accent (shared)
+     ============================================================ */
+  :root{
+    --bg:#FFFFFF; --ink:#0A0A0A; --line:#E4E4E4; --line2:#CFCFCF;
+    --muted:#6B6B6B; --card:#FAFAFA; --accent:#0A0A0A; --on-accent:#FFFFFF;
+    --ok:#1D7D53; --fair:#8A6D00; --sleep:#B23B2E; --radius:12px; --ctrl:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:820px;margin:0 auto;padding:20px 20px 64px;}
+  header.site{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 22px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;}
+  .brand .mark{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;}
+  .brand a{color:inherit;text-decoration:none;}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);font-weight:500;}.privacy svg{width:15px;height:15px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);text-decoration:none;margin-bottom:14px;}.back svg{width:15px;height:15px;}.back:hover{color:var(--ink);}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,44px);letter-spacing:-0.02em;margin:0 0 6px;}
+  .sub{font-size:15px;color:var(--muted);margin:0 0 20px;}
+  .about{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:22px;font-size:13.5px;color:var(--muted);}
+  .about b{color:var(--ink);font-weight:600;}
+
+  /* UTC pinned card */
+  .utc{background:var(--ink);color:#fff;border-radius:var(--radius);padding:18px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .utc .lab{font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#bbb;}
+  .utc .lab b{color:#fff;font-weight:600;display:block;font-size:15px;letter-spacing:0;margin-top:2px;}
+  .utc .clock{font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:600;}
+  .utc .date{font-size:12.5px;color:#bbb;text-align:right;margin-top:2px;}
+
+  .addbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  select,input[type=range]{font-family:'Inter';font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:var(--ctrl);padding:10px 12px;}
+  select{flex:1;min-width:200px;cursor:pointer;}
+  select:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(10,10,10,0.07);}
+  .btn{font-family:'Inter';font-size:13.5px;font-weight:500;padding:10px 14px;border-radius:var(--ctrl);cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:all .15s;}
+  .btn:hover{background:#F0F0F0;}.btn.dark{background:var(--ink);color:#fff;border-color:var(--ink);}.btn svg{width:15px;height:15px;}
+
+  .zone{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
+  .zone .city{font-weight:600;font-size:15px;}
+  .zone .tz{font-size:12px;color:var(--muted);margin-top:1px;}
+  .zone .right{display:flex;align-items:center;gap:14px;}
+  .zone .time{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;}
+  .zone .off{font-size:11.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+  .zone .badge{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.03em;padding:3px 8px;border-radius:6px;}
+  .b-ok{background:#E3F3EB;color:var(--ok);}
+  .b-fair{background:#F5EFD8;color:var(--fair);}
+  .b-sleep{background:#F6E5E3;color:var(--sleep);}
+  .rm{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;border-radius:6px;}
+  .rm:hover{color:var(--sleep);background:#f4ece9;}.rm svg{width:15px;height:15px;display:block;}
+
+  .planner{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-top:22px;}
+  .planner h2{font-family:'Fraunces',serif;font-weight:600;font-size:19px;margin-bottom:4px;}
+  .planner .phelp{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .slider-row{display:flex;align-items:center;gap:14px;margin-bottom:10px;}
+  .slider-row input[type=range]{flex:1;padding:0;}
+  .slider-val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;min-width:118px;}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px;}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+  .foot{margin-top:34px;font-size:12.5px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <div class="brand"><span class="mark">S</span><a href="/">sahil's tools</a></div>
+    <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Runs in your browser</span>
+  </header>
+  <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>All tools</a>
+
+  <h1>World clock</h1>
+  <p class="sub">Live times around the world, UTC pinned on top, plus a meeting planner to find overlapping hours.</p>
+
+  <div class="about">
+    <b>What this does.</b> Shows the current time in as many cities as you like, updating every second. <b>UTC is always pinned at the top</b> as the reference. Add or remove cities freely. The <b>meeting planner</b> below lets you slide a proposed hour and instantly see what time that is everywhere — with a colour showing whether it lands in working hours, waking hours, or the middle of the night. All times are computed with your browser's built-in timezone database, so daylight-saving is handled correctly.
+  </div>
+
+  <!-- UTC — always pinned -->
+  <div class="utc">
+    <div class="lab">Reference <b>UTC — Coordinated Universal Time</b></div>
+    <div style="text-align:right;">
+      <div class="clock" id="utcClock">--:--:--</div>
+      <div class="date" id="utcDate">—</div>
+    </div>
+  </div>
+
+  <!-- add a city -->
+  <div class="addbar">
+    <select id="cityPick"></select>
+    <button class="btn dark" id="addCity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add city</button>
+  </div>
+
+  <!-- live zone list -->
+  <div id="zones"></div>
+
+  <!-- meeting planner -->
+  <div class="planner">
+    <h2>Meeting planner</h2>
+    <p class="phelp">Slide to a proposed time in UTC and see it in every city above. Colours: green = working hours (9–17), amber = awake (7–22), red = night.</p>
+    <div class="slider-row">
+      <input type="range" id="planHour" min="0" max="23" value="12" step="1">
+      <span class="slider-val" id="planLabel">12:00 UTC</span>
+    </div>
+    <div id="planZones"></div>
+    <div class="legend">
+      <span><span class="dot" style="background:#1D7D53;"></span> Working hours</span>
+      <span><span class="dot" style="background:#8A6D00;"></span> Awake</span>
+      <span><span class="dot" style="background:#B23B2E;"></span> Night</span>
+    </div>
+  </div>
+
+  <p class="foot">Made for sahilshaikh.org · runs entirely in your browser</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+
+  /* ============================================================
+     CITY LIST — each is a real IANA timezone name.
+     Using IANA names means the browser handles daylight-saving
+     automatically and correctly (the thing naive code gets wrong).
+     ============================================================ */
+  var CITIES=[
+    ["Doha","Asia/Qatar"],["Dubai","Asia/Dubai"],["Riyadh","Asia/Riyadh"],
+    ["London","Europe/London"],["Paris","Europe/Paris"],["Berlin","Europe/Berlin"],
+    ["New York","America/New_York"],["Chicago","America/Chicago"],["Los Angeles","America/Los_Angeles"],
+    ["São Paulo","America/Sao_Paulo"],["Lagos","Africa/Lagos"],["Cairo","Africa/Cairo"],
+    ["Johannesburg","Africa/Johannesburg"],["Moscow","Europe/Moscow"],["Istanbul","Europe/Istanbul"],
+    ["Mumbai","Asia/Kolkata"],["Karachi","Asia/Karachi"],["Dhaka","Asia/Dhaka"],
+    ["Bangkok","Asia/Bangkok"],["Singapore","Asia/Singapore"],["Hong Kong","Asia/Hong_Kong"],
+    ["Shanghai","Asia/Shanghai"],["Tokyo","Asia/Tokyo"],["Seoul","Asia/Seoul"],
+    ["Sydney","Australia/Sydney"],["Auckland","Pacific/Auckland"],["Honolulu","Pacific/Honolulu"]
+  ];
+
+  // start with a useful spread
+  var selected=["Asia/Qatar","Europe/London","America/New_York","Asia/Tokyo"];
+
+  /* ---- fill the "add city" dropdown ---- */
+  function fillPicker(){
+    var sel=$("cityPick"); sel.innerHTML="";
+    CITIES.forEach(function(c){
+      if(selected.indexOf(c[1])===-1) sel.add(new Option(c[0]+" — "+c[1], c[1]));
+    });
+    if(!sel.options.length) sel.add(new Option("All cities added",""));
+  }
+  function cityName(tz){ var f=CITIES.filter(function(c){return c[1]===tz;})[0]; return f?f[0]:tz.split("/").pop().replace(/_/g," "); }
+
+  /* ============================================================
+     TIME FORMATTING via Intl — the correct way.
+     Intl.DateTimeFormat with a timeZone gives the right local time
+     for that zone at THIS instant, DST included. No manual offsets.
+     ============================================================ */
+  function timeIn(tz, date){
+    return new Intl.DateTimeFormat("en-GB",{timeZone:tz, hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false}).format(date);
+  }
+  function dateIn(tz, date){
+    return new Intl.DateTimeFormat("en-GB",{timeZone:tz, weekday:"short", day:"numeric", month:"short"}).format(date);
+  }
+  /* get the hour (0-23) in a timezone right now — for the working-hours badge */
+  function hourIn(tz, date){
+    var h=new Intl.DateTimeFormat("en-GB",{timeZone:tz, hour:"2-digit", hour12:false}).format(date);
+    return parseInt(h,10)%24;
+  }
+  /* offset from UTC in hours, e.g. "+3", for display */
+  function offsetLabel(tz, date){
+    // compare the same instant formatted in UTC vs the zone
+    var dtf=new Intl.DateTimeFormat("en-US",{timeZone:tz, hour:"2-digit", hour12:false, minute:"2-digit"});
+    var parts=dtf.formatToParts(date);
+    var zh=+parts.find(function(p){return p.type==="hour";}).value;
+    var zm=+parts.find(function(p){return p.type==="minute";}).value;
+    var uh=date.getUTCHours(), um=date.getUTCMinutes();
+    var diff=(zh*60+zm)-(uh*60+um);
+    // wrap into -720..+840
+    if(diff>720) diff-=1440; if(diff<-720) diff+=1440;
+    var sign=diff>=0?"+":"-"; diff=Math.abs(diff);
+    var hh=Math.floor(diff/60), mm=diff%60;
+    return "UTC"+sign+hh+(mm?(":"+String(mm).padStart(2,"0")):"");
+  }
+
+  /* working-hours classification */
+  function classify(hr){
+    if(hr>=9 && hr<17) return ["Working","b-ok"];
+    if(hr>=7 && hr<22) return ["Awake","b-fair"];
+    return ["Night","b-sleep"];
+  }
+
+  /* ============================================================
+     RENDER the live zone cards
+     ============================================================ */
+  function renderZones(){
+    var host=$("zones"); host.innerHTML="";
+    var now=new Date();
+    selected.forEach(function(tz){
+      var cls=classify(hourIn(tz,now));
+      var div=document.createElement("div"); div.className="zone";
+      div.innerHTML=
+        '<div><div class="city">'+cityName(tz)+'</div><div class="tz">'+tz+' · '+offsetLabel(tz,now)+'</div></div>'+
+        '<div class="right">'+
+          '<span class="badge '+cls[1]+'">'+cls[0]+'</span>'+
+          '<div style="text-align:right;"><div class="time" data-clock="'+tz+'">'+timeIn(tz,now)+'</div><div class="off" data-date="'+tz+'">'+dateIn(tz,now)+'</div></div>'+
+          '<button class="rm" data-rm="'+tz+'" aria-label="remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>'+
+        '</div>';
+      host.appendChild(div);
+    });
+    host.querySelectorAll("[data-rm]").forEach(function(b){
+      b.onclick=function(){ selected=selected.filter(function(t){return t!==this.dataset.rm;}.bind(this)); fillPicker(); renderZones(); renderPlan(); };
+    });
+  }
+
+  /* ---- tick: update clocks every second (only the numbers, cheap) ---- */
+  function tick(){
+    var now=new Date();
+    // UTC pinned card
+    $("utcClock").textContent=new Intl.DateTimeFormat("en-GB",{timeZone:"UTC",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(now);
+    $("utcDate").textContent=new Intl.DateTimeFormat("en-GB",{timeZone:"UTC",weekday:"long",day:"numeric",month:"long",year:"numeric"}).format(now);
+    // each zone
+    selected.forEach(function(tz){
+      var c=document.querySelector('[data-clock="'+tz+'"]'); if(c) c.textContent=timeIn(tz,now);
+      var d=document.querySelector('[data-date="'+tz+'"]'); if(d) d.textContent=dateIn(tz,now);
+    });
+  }
+
+  /* ============================================================
+     MEETING PLANNER
+     Take a chosen UTC hour today, and show what time that is in
+     each selected city — using Intl on a Date pinned to that UTC hour.
+     ============================================================ */
+  function renderPlan(){
+    var host=$("planZones"); host.innerHTML="";
+    var h=parseInt($("planHour").value,10);
+    $("planLabel").textContent=String(h).padStart(2,"0")+":00 UTC";
+    // build a Date at today's date but H:00 UTC
+    var now=new Date();
+    var d=new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), h, 0, 0));
+    selected.forEach(function(tz){
+      var localTime=new Intl.DateTimeFormat("en-GB",{timeZone:tz,hour:"2-digit",minute:"2-digit",hour12:false}).format(d);
+      var localHour=hourIn(tz,d);
+      var cls=classify(localHour);
+      var row=document.createElement("div"); row.className="zone"; row.style.marginBottom="8px";
+      row.innerHTML=
+        '<div><div class="city" style="font-size:14px;">'+cityName(tz)+'</div><div class="tz">'+offsetLabel(tz,d)+'</div></div>'+
+        '<div class="right"><span class="badge '+cls[1]+'">'+cls[0]+'</span><div class="time" style="font-size:18px;">'+localTime+'</div></div>';
+      host.appendChild(row);
+    });
+  }
+
+  /* ============================================================
+     WIRE UP
+     ============================================================ */
+  $("addCity").onclick=function(){
+    var tz=$("cityPick").value;
+    if(tz && selected.indexOf(tz)===-1){ selected.push(tz); fillPicker(); renderZones(); renderPlan(); }
+  };
+  $("planHour").addEventListener("input",renderPlan);
+
+  /* ---- START ---- */
+  fillPicker();
+  renderZones();
+  renderPlan();
+  tick();
+  setInterval(tick,1000);
+})();
+</script>
+</body>
+</html>

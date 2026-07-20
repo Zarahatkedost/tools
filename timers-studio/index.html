@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timers Studio - Pomodoro, Stopwatch, Countdown</title>
+    <style>
+        :root {
+            --accent: #000000;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --border: #E5E7EB;
+            --bg-light: #F9FAFB;
+            --bg-white: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-white);
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .explainer {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .explainer h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 110px;
+            padding: 1rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--accent);
+        }
+
+        .tool-section {
+            display: none;
+        }
+
+        .tool-section.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .timer-display {
+            font-family: 'Courier New', monospace;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 1.5rem 0;
+            letter-spacing: 2px;
+        }
+
+        .timer-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        button {
+            padding: 0.65rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--bg-light);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .settings {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .setting-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .setting-group label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .setting-group input {
+            width: 70px;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .laps-list {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .lap-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .lap-item:last-child {
+            border-bottom: none;
+        }
+
+        .lap-num {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .lap-time {
+            color: var(--text-primary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-light);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 1.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 100%;
+            transition: width 0.1s linear;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .timer-display {
+                font-size: 2.5rem;
+            }
+
+            .tab-btn {
+                min-width: 90px;
+                font-size: 0.8rem;
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div>
+            <a href="/" class="back-link">← Back to Tools</a>
+            <h1>Timers Studio</h1>
+        </div>
+
+        <div class="explainer">
+            <h3>What This Does</h3>
+            <p>Three timers in one: Pomodoro (25 min work + 5 min break), Stopwatch (count up with laps), and Countdown (custom duration). All run locally with accurate Web Audio for sound notifications.</p>
+        </div>
+
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchTab('pomodoro')">Pomodoro</button>
+            <button class="tab-btn" onclick="switchTab('stopwatch')">Stopwatch</button>
+            <button class="tab-btn" onclick="switchTab('countdown')">Countdown</button>
+        </div>
+
+        <!-- ===== POMODORO ===== -->
+        <div id="pomodoro" class="tool-section active">
+            <div class="card">
+                <div class="timer-label" id="pom-label">Work Session</div>
+                <div class="timer-display" id="pom-display">25:00</div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="pom-progress"></div>
+                </div>
+
+                <div class="controls">
+                    <button onclick="pomStart()" id="pom-start">Start</button>
+                    <button onclick="pomPause()" id="pom-pause" disabled>Pause</button>
+                    <button onclick="pomReset()" class="btn-secondary">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== STOPWATCH ===== -->
+        <div id="stopwatch" class="tool-section">
+            <div class="card">
+                <div class="timer-label">Elapsed Time</div>
+                <div class="timer-display" id="sw-display">00:00:00</div>
+
+                <div class="controls">
+                    <button onclick="swStart()" id="sw-start">Start</button>
+                    <button onclick="swPause()" id="sw-pause" disabled>Pause</button>
+                    <button onclick="swLap()" id="sw-lap" disabled>Lap</button>
+                    <button onclick="swReset()" class="btn-secondary">Reset</button>
+                </div>
+
+                <div class="laps-list" id="sw-laps" style="display: none;">
+                    <div id="sw-laps-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== COUNTDOWN ===== -->
+        <div id="countdown" class="tool-section">
+            <div class="card">
+                <div class="timer-label">Countdown Timer</div>
+
+                <div class="settings" id="cd-settings">
+                    <div class="setting-group">
+                        <label>Minutes:</label>
+                        <input type="number" id="cd-minutes" value="5" min="0" max="59" onchange="cdUpdateDisplay()">
+                    </div>
+                    <div class="setting-group">
+                        <label>Seconds:</label>
+                        <input type="number" id="cd-seconds" value="0" min="0" max="59" onchange="cdUpdateDisplay()">
+                    </div>
+                </div>
+
+                <div class="timer-display" id="cd-display">05:00</div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="cd-progress"></div>
+                </div>
+
+                <div class="controls">
+                    <button onclick="cdStart()" id="cd-start">Start</button>
+                    <button onclick="cdPause()" id="cd-pause" disabled>Pause</button>
+                    <button onclick="cdReset()" class="btn-secondary">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== GLOBAL STATE =====
+        let pomInterval = null, pomRunning = false, pomTimeLeft = 25 * 60, pomIsWork = true, pomTotalTime = 25 * 60;
+        let swInterval = null, swRunning = false, swElapsed = 0, swLaps = [];
+        let cdInterval = null, cdRunning = false, cdTimeLeft = 5 * 60, cdTotalTime = 5 * 60;
+
+        // ===== TAB SWITCHING =====
+        function switchTab(tabName) {
+            document.querySelectorAll('.tool-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // ===== UTILITY: Format Time =====
+        function formatTime(totalSeconds) {
+            const hrs = Math.floor(totalSeconds / 3600);
+            const mins = Math.floor((totalSeconds % 3600) / 60);
+            const secs = totalSeconds % 60;
+            
+            if (hrs > 0) {
+                return `${hrs}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+            return `${mins}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // ===== UTILITY: Play Sound =====
+        function playSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                
+                oscillator.connect(gain);
+                gain.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                console.log('Audio not available');
+            }
+        }
+
+        // ===== POMODORO TIMER =====
+        function pomStart() {
+            if (pomRunning) return;
+            pomRunning = true;
+            document.getElementById('pom-start').disabled = true;
+            document.getElementById('pom-pause').disabled = false;
+            document.getElementById('cd-settings').style.display = 'none';
+
+            pomInterval = setInterval(() => {
+                pomTimeLeft--;
+                updatePomDisplay();
+                
+                if (pomTimeLeft <= 0) {
+                    playSound();
+                    pomIsWork = !pomIsWork;
+                    pomTimeLeft = pomIsWork ? 25 * 60 : 5 * 60;
+                    pomTotalTime = pomTimeLeft;
+                    updatePomDisplay();
+                }
+            }, 1000);
+        }
+
+        function pomPause() {
+            pomRunning = false;
+            clearInterval(pomInterval);
+            document.getElementById('pom-start').disabled = false;
+            document.getElementById('pom-pause').disabled = true;
+        }
+
+        function pomReset() {
+            pomRunning = false;
+            clearInterval(pomInterval);
+            pomTimeLeft = 25 * 60;
+            pomIsWork = true;
+            pomTotalTime = pomTimeLeft;
+            document.getElementById('pom-start').disabled = false;
+            document.getElementById('pom-pause').disabled = true;
+            updatePomDisplay();
+        }
+
+        function updatePomDisplay() {
+            document.getElementById('pom-display').textContent = formatTime(pomTimeLeft);
+            document.getElementById('pom-label').textContent = pomIsWork ? 'Work Session' : 'Break Time';
+            const progress = ((pomTotalTime - pomTimeLeft) / pomTotalTime) * 100;
+            document.getElementById('pom-progress').style.width = progress + '%';
+        }
+
+        // ===== STOPWATCH =====
+        function swStart() {
+            if (swRunning) return;
+            swRunning = true;
+            document.getElementById('sw-start').disabled = true;
+            document.getElementById('sw-pause').disabled = false;
+            document.getElementById('sw-lap').disabled = false;
+
+            swInterval = setInterval(() => {
+                swElapsed++;
+                updateSwDisplay();
+            }, 1000);
+        }
+
+        function swPause() {
+            swRunning = false;
+            clearInterval(swInterval);
+            document.getElementById('sw-start').disabled = false;
+            document.getElementById('sw-pause').disabled = true;
+        }
+
+        function swLap() {
+            swLaps.push(swElapsed);
+            updateSwLaps();
+        }
+
+        function swReset() {
+            swRunning = false;
+            clearInterval(swInterval);
+            swElapsed = 0;
+            swLaps = [];
+            document.getElementById('sw-start').disabled = false;
+            document.getElementById('sw-pause').disabled = true;
+            document.getElementById('sw-lap').disabled = true;
+            document.getElementById('sw-laps').style.display = 'none';
+            updateSwDisplay();
+        }
+
+        function updateSwDisplay() {
+            document.getElementById('sw-display').textContent = formatTime(swElapsed);
+        }
+
+        function updateSwLaps() {
+            const container = document.getElementById('sw-laps-content');
+            container.innerHTML = swLaps.map((time, i) => {
+                const lapTime = i === 0 ? time : time - swLaps[i - 1];
+                return `<div class="lap-item"><span class="lap-num">Lap ${i + 1}</span><span class="lap-time">${formatTime(lapTime)}</span></div>`;
+            }).join('');
+            document.getElementById('sw-laps').style.display = 'block';
+        }
+
+        // ===== COUNTDOWN =====
+        function cdUpdateDisplay() {
+            const mins = parseInt(document.getElementById('cd-minutes').value) || 0;
+            const secs = parseInt(document.getElementById('cd-seconds').value) || 0;
+            cdTimeLeft = mins * 60 + secs;
+            cdTotalTime = cdTimeLeft;
+            document.getElementById('cd-display').textContent = formatTime(cdTimeLeft);
+            document.getElementById('cd-progress').style.width = '100%';
+        }
+
+        function cdStart() {
+            if (cdRunning || cdTimeLeft <= 0) return;
+            cdRunning = true;
+            document.getElementById('cd-start').disabled = true;
+            document.getElementById('cd-pause').disabled = false;
+            document.getElementById('cd-settings').style.pointerEvents = 'none';
+            document.getElementById('cd-settings').style.opacity = '0.5';
+
+            cdInterval = setInterval(() => {
+                cdTimeLeft--;
+                updateCdDisplay();
+                
+                if (cdTimeLeft <= 0) {
+                    playSound();
+                    playSound();
+                    cdRunning = false;
+                    clearInterval(cdInterval);
+                    document.getElementById('cd-start').disabled = false;
+                    document.getElementById('cd-pause').disabled = true;
+                    document.getElementById('cd-settings').style.pointerEvents = 'auto';
+                    document.getElementById('cd-settings').style.opacity = '1';
+                }
+            }, 1000);
+        }
+
+        function cdPause() {
+            cdRunning = false;
+            clearInterval(cdInterval);
+            document.getElementById('cd-start').disabled = false;
+            document.getElementById('cd-pause').disabled = true;
+        }
+
+        function cdReset() {
+            cdRunning = false;
+            clearInterval(cdInterval);
+            cdUpdateDisplay();
+            document.getElementById('cd-start').disabled = false;
+            document.getElementById('cd-pause').disabled = true;
+            document.getElementById('cd-settings').style.pointerEvents = 'auto';
+            document.getElementById('cd-settings').style.opacity = '1';
+        }
+
+        function updateCdDisplay() {
+            document.getElementById('cd-display').textContent = formatTime(cdTimeLeft);
+            const progress = ((cdTotalTime - cdTimeLeft) / cdTotalTime) * 100;
+            document.getElementById('cd-progress').style.width = progress + '%';
+        }
+
+        // ===== INITIALIZE =====
+        updatePomDisplay();
+        updateSwDisplay();
+        cdUpdateDisplay();
+    </script>
+</body>
+</html>

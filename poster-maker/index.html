@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poster maker · Sahil's tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{--paper:#F5F2EC;--ink:#1C1B19;--line:#DEDACF;--line2:#CBC6B8;--accent:#1F4FD8;--accent-ink:#15379a;--muted:#6E6A60;--card:#FCFAF6;--ok:#1D7D53;--radius:12px;--ctrl:10px;}
+  *{box-sizing:border-box;}html,body{margin:0;}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1100px;margin:0 auto;padding:16px 16px 48px;}
+  header.site{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0 16px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;}
+  .brand .mark{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;}
+  .brand a{color:inherit;text-decoration:none;}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ok);font-weight:500;}.privacy svg{width:15px;height:15px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);text-decoration:none;margin-bottom:10px;}.back svg{width:15px;height:15px;}.back:hover{color:var(--ink);}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(26px,4vw,36px);letter-spacing:-0.02em;margin:0 0 14px;}
+  .app{display:grid;grid-template-columns:200px 1fr 210px;gap:14px;align-items:start;}
+  @media(max-width:900px){.app{grid-template-columns:1fr;}}
+  .side{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;}
+  .side h3{font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin:0 0 10px;font-weight:600;}
+  .side h3:not(:first-child){margin-top:16px;}
+  .toolbtn{width:100%;text-align:left;font-family:'Inter';font-size:13.5px;font-weight:500;padding:9px 12px;border-radius:var(--ctrl);cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink);display:flex;align-items:center;gap:9px;margin-bottom:7px;transition:all .15s;}
+  .toolbtn:hover{background:#F3EFE6;}.toolbtn svg{width:16px;height:16px;color:var(--muted);}
+  .sizes button{font-size:12.5px;padding:7px 10px;margin:0 6px 6px 0;border:1px solid var(--line2);background:#fff;border-radius:8px;cursor:pointer;}
+  .sizes button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .custom{display:flex;gap:6px;align-items:center;margin-top:6px;}
+  .custom input{width:56px;font-family:'JetBrains Mono';font-size:12px;padding:6px;border:1px solid var(--line2);border-radius:7px;}
+  .canvaswrap{background:#E9E5DC;border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:flex;align-items:center;justify-content:center;min-height:420px;overflow:auto;}
+  #stage{position:relative;background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.1);transform-origin:center;}
+  .obj{position:absolute;cursor:move;user-select:none;}
+  .obj.sel{outline:2px solid var(--accent);}
+  .obj .handle{position:absolute;right:-6px;bottom:-6px;width:12px;height:12px;background:var(--accent);border:2px solid #fff;border-radius:50%;cursor:nwse-resize;}
+  .prop label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;font-weight:500;}
+  .prop input[type=text],.prop textarea{width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--line2);border-radius:8px;font-family:'Inter';}
+  .prop input[type=range]{width:100%;}
+  .swatches{display:flex;gap:6px;flex-wrap:wrap;}
+  .sw{width:24px;height:24px;border-radius:6px;cursor:pointer;border:1px solid var(--line2);}
+  .btn{font-family:'Inter';font-size:14px;font-weight:500;padding:11px 16px;border-radius:var(--ctrl);cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:all .15s;width:100%;}
+  .btn:hover{background:#F3EFE6;}.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}.btn.primary:hover{background:var(--accent-ink);}.btn svg{width:16px;height:16px;}
+  .empty{color:var(--muted);font-size:12.5px;}
+  .foot{margin-top:24px;font-size:12.5px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <div class="brand"><span class="mark">S</span><a href="/">sahil's tools</a></div>
+    <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Everything stays on your device</span>
+  </header>
+  <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>All tools</a>
+  <h1>Poster maker</h1>
+
+  <div class="app">
+    <!-- LEFT: add + sizes -->
+    <div class="side">
+      <h3>Add</h3>
+      <button class="toolbtn" id="addText"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>Text</button>
+      <button class="toolbtn" id="addRect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Rectangle</button>
+      <button class="toolbtn" id="addCircle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>Circle</button>
+      <button class="toolbtn" id="addImg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>Image</button>
+      <input type="file" id="imgFile" accept="image/*" hidden>
+
+      <h3>Canvas size</h3>
+      <div class="sizes" id="sizes"></div>
+      <div class="custom">
+        <input type="text" id="cw" placeholder="W"><span style="color:var(--muted);">×</span><input type="text" id="ch" placeholder="H">
+        <button class="sizes" style="margin:0;"><span id="setCustom" style="cursor:pointer;font-size:12px;color:var(--accent);font-weight:600;">set</span></button>
+      </div>
+    </div>
+
+    <!-- CENTER: canvas -->
+    <div class="canvaswrap"><div id="stage"></div></div>
+
+    <!-- RIGHT: properties + export -->
+    <div class="side">
+      <h3>Selected</h3>
+      <div class="prop" id="prop"><p class="empty">Nothing selected. Add something or click an item to edit it.</p></div>
+      <div style="margin-top:16px;"><button class="btn primary" id="export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export</button></div>
+      <div style="margin-top:8px;display:flex;gap:8px;">
+        <button class="btn" id="exPng" style="font-size:13px;">PNG</button>
+        <button class="btn" id="exPdf" style="font-size:13px;">PDF</button>
+      </div>
+    </div>
+  </div>
+  <p class="foot">Made for sahilshaikh.org · runs entirely in your browser · lightweight poster & graphic maker</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var stage=$("stage");
+  var objs=[]; var sel=null; var uid=0;
+  var PALETTE=["#1C1B19","#1F4FD8","#BC39ED","#E7492E","#1D7D53","#EAB308","#FFFFFF","#6E6A60"];
+
+  var SIZES=[
+    {n:"A4 portrait",w:794,h:1123},
+    {n:"A4 landscape",w:1123,h:794},
+    {n:"Instagram",w:1080,h:1080},
+    {n:"Story",w:1080,h:1920},
+    {n:"Slide 16:9",w:1280,h:720}
+  ];
+  var canvasW=1080, canvasH=1080, viewScale=1;
+
+  function renderSizes(){
+    var host=$("sizes"); host.innerHTML="";
+    SIZES.forEach(function(s){
+      var b=document.createElement("button");
+      b.textContent=s.n; if(s.w===canvasW&&s.h===canvasH) b.className="on";
+      b.onclick=function(){ setSize(s.w,s.h); };
+      host.appendChild(b);
+    });
+  }
+  function setSize(w,h){ canvasW=w; canvasH=h; layout(); renderSizes(); }
+  function layout(){
+    var maxW=Math.min(560, window.innerWidth-60), maxH=520;
+    viewScale=Math.min(maxW/canvasW, maxH/canvasH, 1);
+    stage.style.width=canvasW*viewScale+"px"; stage.style.height=canvasH*viewScale+"px";
+    renderObjs();
+  }
+
+  function addObj(o){ o.id=++uid; objs.push(o); select(o); renderObjs(); }
+  function addText(){ addObj({type:"text",x:canvasW*0.15,y:canvasH*0.4,w:canvasW*0.7,text:"Your text",size:Math.round(canvasH*0.06),color:"#1C1B19",weight:700,align:"center"}); }
+  function addRect(){ addObj({type:"rect",x:canvasW*0.3,y:canvasH*0.3,w:canvasW*0.4,h:canvasH*0.2,color:"#1F4FD8",radius:0}); }
+  function addCircle(){ addObj({type:"circle",x:canvasW*0.35,y:canvasH*0.35,w:canvasW*0.3,h:canvasW*0.3,color:"#BC39ED"}); }
+  function addImage(src,iw,ih){ var w=canvasW*0.5, h=w*ih/iw; addObj({type:"img",x:canvasW*0.25,y:canvasH*0.25,w:w,h:h,src:src}); }
+
+  $("addText").onclick=addText; $("addRect").onclick=addRect; $("addCircle").onclick=addCircle;
+  $("addImg").onclick=function(){ $("imgFile").click(); };
+  $("imgFile").onchange=function(){ var f=this.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(e){ var im=new Image(); im.onload=function(){ addImage(e.target.result,im.width,im.height); }; im.src=e.target.result; }; r.readAsDataURL(f); this.value=""; };
+
+  $("setCustom").onclick=function(){ var w=parseInt($("cw").value,10), h=parseInt($("ch").value,10); if(w>50&&h>50&&w<5000&&h<5000) setSize(w,h); };
+
+  function select(o){ sel=o; renderObjs(); renderProp(); }
+
+  function renderObjs(){
+    stage.innerHTML="";
+    objs.forEach(function(o){
+      var d=document.createElement("div"); d.className="obj"+(o===sel?" sel":"");
+      d.style.left=(o.x*viewScale)+"px"; d.style.top=(o.y*viewScale)+"px";
+      d.style.width=(o.w*viewScale)+"px";
+      if(o.type==="text"){
+        d.style.fontSize=(o.size*viewScale)+"px"; d.style.color=o.color; d.style.fontWeight=o.weight;
+        d.style.textAlign=o.align; d.style.fontFamily="Inter, sans-serif"; d.style.lineHeight="1.15";
+        d.style.height="auto"; d.textContent=o.text;
+      } else if(o.type==="rect"){
+        d.style.height=(o.h*viewScale)+"px"; d.style.background=o.color; d.style.borderRadius=(o.radius*viewScale)+"px";
+      } else if(o.type==="circle"){
+        d.style.height=(o.h*viewScale)+"px"; d.style.background=o.color; d.style.borderRadius="50%";
+      } else if(o.type==="img"){
+        d.style.height=(o.h*viewScale)+"px"; d.style.backgroundImage="url("+o.src+")"; d.style.backgroundSize="cover"; d.style.backgroundPosition="center";
+      }
+      if(o===sel){ var hd=document.createElement("div"); hd.className="handle"; d.appendChild(hd); startResize(hd,o); }
+      startDrag(d,o);
+      stage.appendChild(d);
+    });
+  }
+
+  function startDrag(el,o){
+    el.addEventListener("pointerdown",function(e){
+      if(e.target.classList.contains("handle")) return;
+      e.preventDefault(); select(o);
+      var sx=e.clientX, sy=e.clientY, ox=o.x, oy=o.y;
+      function mv(ev){ o.x=ox+(ev.clientX-sx)/viewScale; o.y=oy+(ev.clientY-sy)/viewScale; renderObjs(); }
+      function up(){ document.removeEventListener("pointermove",mv); document.removeEventListener("pointerup",up); }
+      document.addEventListener("pointermove",mv); document.addEventListener("pointerup",up);
+    });
+  }
+  function startResize(handle,o){
+    handle.addEventListener("pointerdown",function(e){
+      e.preventDefault(); e.stopPropagation();
+      var sx=e.clientX, ow=o.w, oh=o.h||0, os=o.size||0;
+      function mv(ev){
+        var dw=(ev.clientX-sx)/viewScale;
+        o.w=Math.max(20,ow+dw);
+        if(o.type==="text"){ o.size=Math.max(8,os*(o.w/ow)); }
+        else if(o.h!==undefined){ o.h=Math.max(20,oh*(o.w/ow)); }
+        renderObjs(); renderProp();
+      }
+      function up(){ document.removeEventListener("pointermove",mv); document.removeEventListener("pointerup",up); }
+      document.addEventListener("pointermove",mv); document.addEventListener("pointerup",up);
+    });
+  }
+
+  function renderProp(){
+    var p=$("prop");
+    if(!sel){ p.innerHTML='<p class="empty">Nothing selected. Add something or click an item to edit it.</p>'; return; }
+    var h="";
+    if(sel.type==="text"){
+      h+='<label>Text</label><textarea id="p_text" rows="2">'+sel.text.replace(/</g,"&lt;")+'</textarea>';
+      h+='<label>Size</label><input type="range" id="p_size" min="10" max="'+Math.round(canvasH*0.2)+'" value="'+sel.size+'">';
+      h+='<label>Weight</label><input type="range" id="p_weight" min="400" max="700" step="300" value="'+sel.weight+'">';
+    }
+    if(sel.type==="rect"){ h+='<label>Corner radius</label><input type="range" id="p_radius" min="0" max="120" value="'+sel.radius+'">'; }
+    if(sel.type!=="img"){ h+='<label>Color</label><div class="swatches" id="p_sw"></div>'; }
+    h+='<div style="margin-top:14px;"><button class="btn" id="p_del" style="border-color:#e3c4bf;color:#B23B2E;">Delete</button></div>';
+    p.innerHTML=h;
+    if($("p_text")) $("p_text").oninput=function(){ sel.text=this.value; renderObjs(); };
+    if($("p_size")) $("p_size").oninput=function(){ sel.size=+this.value; renderObjs(); };
+    if($("p_weight")) $("p_weight").oninput=function(){ sel.weight=+this.value; renderObjs(); };
+    if($("p_radius")) $("p_radius").oninput=function(){ sel.radius=+this.value; renderObjs(); };
+    if($("p_sw")){ PALETTE.forEach(function(c){ var s=document.createElement("div"); s.className="sw"; s.style.background=c; s.onclick=function(){ sel.color=c; renderObjs(); }; $("p_sw").appendChild(s); }); }
+    if($("p_del")) $("p_del").onclick=function(){ objs=objs.filter(function(x){return x!==sel;}); sel=null; renderObjs(); renderProp(); };
+  }
+
+  stage.addEventListener("pointerdown",function(e){ if(e.target===stage){ sel=null; renderObjs(); renderProp(); } });
+
+  // ---- export ----
+  function renderToCanvas(scale){
+    var cv=document.createElement("canvas"); cv.width=canvasW; cv.height=canvasH;
+    var c=cv.getContext("2d");
+    c.fillStyle="#fff"; c.fillRect(0,0,canvasW,canvasH);
+    return new Promise(function(res){
+      var pending=0, done=false;
+      objs.forEach(function(o){
+        if(o.type==="rect"){ c.fillStyle=o.color; roundRect(c,o.x,o.y,o.w,o.h,o.radius); c.fill(); }
+        else if(o.type==="circle"){ c.fillStyle=o.color; c.beginPath(); c.ellipse(o.x+o.w/2,o.y+o.h/2,o.w/2,o.h/2,0,0,Math.PI*2); c.fill(); }
+        else if(o.type==="text"){ c.fillStyle=o.color; c.font=o.weight+" "+o.size+"px Inter, sans-serif"; c.textBaseline="top"; c.textAlign=o.align;
+          var tx=o.align==="center"?o.x+o.w/2:(o.align==="right"?o.x+o.w:o.x);
+          wrapText(c,o.text,tx,o.y,o.w,o.size*1.15);
+        }
+        else if(o.type==="img"){ pending++; var im=new Image(); im.onload=function(){ c.drawImage(im,o.x,o.y,o.w,o.h); pending--; if(done&&pending===0) res(cv); }; im.src=o.src; }
+      });
+      done=true; if(pending===0) res(cv);
+    });
+  }
+  function roundRect(c,x,y,w,h,r){ r=Math.min(r,w/2,h/2); c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+  function wrapText(c,text,x,y,maxW,lh){ var words=text.split(/\s+/), line="", yy=y; for(var i=0;i<words.length;i++){ var test=line+words[i]+" "; if(c.measureText(test).width>maxW && line){ c.fillText(line.trim(),x,yy); line=words[i]+" "; yy+=lh; } else line=test; } c.fillText(line.trim(),x,yy); }
+
+  $("exPng").onclick=function(){ renderToCanvas().then(function(cv){ var a=document.createElement("a"); a.download="poster.png"; a.href=cv.toDataURL("image/png"); a.click(); }); };
+  $("export").onclick=function(){ $("exPng").click(); };
+  $("exPdf").onclick=function(){ renderToCanvas().then(function(cv){ var jsPDF=window.jspdf.jsPDF; var orient=canvasW>canvasH?"l":"p"; var pdf=new jsPDF({orientation:orient,unit:"px",format:[canvasW,canvasH]}); pdf.addImage(cv.toDataURL("image/jpeg",0.92),"JPEG",0,0,canvasW,canvasH); pdf.save("poster.pdf"); }); };
+
+  window.addEventListener("resize",layout);
+  renderSizes(); layout(); addText();
+})();
+</script>
+</body>
+</html>

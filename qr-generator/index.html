@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR code generator · Sahil's tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+  :root{
+    --paper:#F5F2EC; --ink:#1C1B19; --line:#DEDACF; --line2:#CBC6B8;
+    --accent:#1F4FD8; --accent-ink:#15379a; --muted:#6E6A60; --card:#FCFAF6;
+    --ok:#1D7D53; --warn:#B4611A; --danger:#B23B2E;
+    --radius:12px; --ctrl:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1020px;margin:0 auto;padding:20px 20px 64px;}
+
+  header.site{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 22px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;letter-spacing:-0.01em;}
+  .brand .mark{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;}
+  .brand a{color:inherit;text-decoration:none;}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ok);font-weight:500;}
+  .privacy svg{width:15px;height:15px;}
+
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);text-decoration:none;margin-bottom:14px;}
+  .back:hover{color:var(--ink);}
+  .back svg{width:15px;height:15px;}
+
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,44px);line-height:1.03;letter-spacing:-0.02em;margin:0 0 6px;}
+  .sub{font-size:15px;color:var(--muted);margin:0 0 26px;max-width:52ch;}
+
+  .grid{display:grid;grid-template-columns:1fr 300px;gap:26px;align-items:start;}
+  @media(max-width:760px){.grid{grid-template-columns:1fr;}}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
+  .field{margin-bottom:16px;}
+  .field:last-child{margin-bottom:0;}
+  label.lbl{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-bottom:6px;letter-spacing:0.01em;}
+  input[type=text],textarea{width:100%;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:var(--ctrl);padding:10px 12px;transition:border-color .15s,box-shadow .15s;}
+  textarea{resize:vertical;min-height:64px;line-height:1.5;}
+  input[type=text]:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(31,79,216,0.12);}
+
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:420px){.row2{grid-template-columns:1fr;}}
+
+  .colorline{display:flex;align-items:center;gap:10px;}
+  .swatch{position:relative;width:38px;height:38px;border-radius:9px;border:1px solid var(--line2);overflow:hidden;flex-shrink:0;cursor:pointer;}
+  .swatch input[type=color]{position:absolute;inset:-6px;width:150%;height:150%;border:none;padding:0;cursor:pointer;background:none;}
+  .hex{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ink);width:100%;text-transform:uppercase;}
+
+  .seg{display:inline-flex;background:#EFEBE1;border-radius:var(--ctrl);padding:3px;gap:2px;}
+  .seg button{font-family:'Inter';font-size:13px;font-weight:500;border:none;background:none;color:var(--muted);padding:6px 14px;border-radius:8px;cursor:pointer;transition:all .15s;}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,0.06);}
+
+  .center-opts{margin-top:6px;}
+  .hide{display:none !important;}
+
+  .uploadbtn{display:inline-flex;align-items:center;gap:7px;font-family:'Inter';font-size:13.5px;font-weight:500;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:var(--ctrl);padding:9px 14px;cursor:pointer;transition:background .15s,border-color .15s;}
+  .uploadbtn:hover{background:#F3EFE6;border-color:var(--line2);}
+  .uploadbtn svg{width:16px;height:16px;}
+  .fname{font-size:12.5px;color:var(--muted);margin-left:10px;}
+  .clearlogo{font-size:12.5px;color:var(--danger);background:none;border:none;cursor:pointer;margin-left:8px;padding:0;}
+
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:var(--line2);outline:none;margin:8px 0 2px;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid #fff;}
+  .rangerow{display:flex;align-items:center;gap:12px;}
+  .rangeval{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink);min-width:38px;text-align:right;}
+
+  .scanhint{display:flex;align-items:center;gap:7px;font-size:12px;margin-top:10px;font-weight:500;}
+  .scanhint svg{width:14px;height:14px;flex-shrink:0;}
+  .scanhint.ok{color:var(--ok);}
+  .scanhint.warn{color:var(--warn);}
+
+  .preview{position:sticky;top:16px;}
+  .qrbox{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;align-items:center;gap:16px;}
+  .qrstage{width:236px;height:236px;background:#fff;border-radius:10px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:12px;}
+  #qrcanvas{width:100%;height:100%;image-rendering:pixelated;border-radius:2px;}
+  .caption-preview{font-size:13px;color:var(--ink);text-align:center;min-height:0;font-weight:500;word-break:break-word;}
+  .dlrow{display:flex;flex-direction:column;gap:8px;width:100%;}
+  .btn{font-family:'Inter';font-size:14px;font-weight:500;padding:11px 14px;border-radius:var(--ctrl);cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:all .15s;width:100%;}
+  .btn:hover{background:#F3EFE6;}
+  .btn svg{width:16px;height:16px;}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .btn.primary:hover{background:var(--accent-ink);}
+
+  .foot{margin-top:34px;font-size:12.5px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <div class="brand"><span class="mark">S</span><a href="/">sahil's tools</a></div>
+    <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>100% private — nothing leaves your device</span>
+  </header>
+
+  <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>All tools</a>
+
+  <h1>QR code generator</h1>
+  <p class="sub">Type any link or text and get a QR instantly. Pick your colors, drop a logo or short text in the middle, add a caption — then download.</p>
+
+  <div class="grid">
+    <!-- CONTROLS -->
+    <div class="panel">
+      <div class="field">
+        <label class="lbl" for="content">Content — a link or any text</label>
+        <textarea id="content" placeholder="https://sahilshaikh.org">https://sahilshaikh.org</textarea>
+      </div>
+
+      <div class="field">
+        <div class="row2">
+          <div>
+            <label class="lbl">Code color</label>
+            <div class="colorline">
+              <span class="swatch"><input type="color" id="fg" value="#1C1B19"></span>
+              <input type="text" class="hex" id="fghex" value="#1C1B19">
+            </div>
+          </div>
+          <div>
+            <label class="lbl">Background</label>
+            <div class="colorline">
+              <span class="swatch"><input type="color" id="bg" value="#FFFFFF"></span>
+              <input type="text" class="hex" id="bghex" value="#FFFFFF">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="lbl">Center of the code</label>
+        <div class="seg" id="centermode">
+          <button data-mode="none" class="on">Nothing</button>
+          <button data-mode="logo">Logo / photo</button>
+          <button data-mode="text">Short text</button>
+        </div>
+
+        <div class="center-opts hide" id="opt-logo">
+          <div style="margin-top:12px;display:flex;align-items:center;flex-wrap:wrap;">
+            <label class="uploadbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M8 8l4-4 4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Upload image<input type="file" id="logofile" accept="image/*" hidden></label>
+            <span class="fname" id="logoname">no file yet</span>
+            <button class="clearlogo hide" id="logoclear">remove</button>
+          </div>
+          <div style="margin-top:14px;">
+            <label class="lbl">Logo size</label>
+            <div class="rangerow"><input type="range" id="logosize" min="10" max="28" value="20" step="1"><span class="rangeval" id="logosizeval">20%</span></div>
+          </div>
+        </div>
+
+        <div class="center-opts hide" id="opt-text">
+          <div style="margin-top:12px;">
+            <input type="text" id="centertext" maxlength="6" placeholder="e.g. ABS">
+          </div>
+          <div style="margin-top:12px;">
+            <label class="lbl">Text color</label>
+            <div class="colorline">
+              <span class="swatch"><input type="color" id="ctcolor" value="#1F4FD8"></span>
+              <input type="text" class="hex" id="ctcolorhex" value="#1F4FD8">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="lbl" for="caption">Caption under the code (optional)</label>
+        <input type="text" id="caption" placeholder="Scan me" maxlength="40">
+      </div>
+
+      <div class="scanhint ok" id="scanhint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        <span id="scantext">Looks scannable</span>
+      </div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="preview">
+      <div class="qrbox">
+        <div class="qrstage"><canvas id="qrcanvas" width="1000" height="1000"></canvas></div>
+        <div class="caption-preview" id="capprev"></div>
+        <div class="dlrow">
+          <button class="btn primary" id="dlpng"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Download PNG</button>
+          <button class="btn" id="dlsvg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Download SVG</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="foot">Made for sahilshaikh.org · runs entirely in your browser</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var state = {
+    content:"https://sahilshaikh.org",
+    fg:"#1C1B19", bg:"#FFFFFF",
+    centerMode:"none",
+    logoImg:null, logoSize:20,
+    centerText:"", centerTextColor:"#1F4FD8",
+    caption:""
+  };
+
+  var $ = function(id){return document.getElementById(id);};
+  var canvas = $("qrcanvas");
+  var ctx = canvas.getContext("2d");
+  var lastModules = 0;
+
+  // ---- color pairs (swatch <-> hex text) ----
+  function hookColor(colorId, hexId, key){
+    var c=$(colorId), h=$(hexId);
+    c.addEventListener("input",function(){ h.value=c.value.toUpperCase(); state[key]=c.value; render(); });
+    h.addEventListener("input",function(){
+      var v=h.value.trim(); if(!v.startsWith("#")) v="#"+v;
+      if(/^#[0-9a-fA-F]{6}$/.test(v)){ c.value=v; state[key]=v; render(); }
+    });
+  }
+  hookColor("fg","fghex","fg");
+  hookColor("bg","bghex","bg");
+  hookColor("ctcolor","ctcolorhex","centerTextColor");
+
+  // ---- content ----
+  $("content").addEventListener("input",function(){ state.content=this.value; render(); });
+
+  // ---- center mode segmented ----
+  var seg=$("centermode");
+  seg.addEventListener("click",function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    [].forEach.call(seg.children,function(x){x.classList.remove("on");});
+    b.classList.add("on");
+    state.centerMode=b.dataset.mode;
+    $("opt-logo").classList.toggle("hide", state.centerMode!=="logo");
+    $("opt-text").classList.toggle("hide", state.centerMode!=="text");
+    render();
+  });
+
+  // ---- logo upload ----
+  $("logofile").addEventListener("change",function(e){
+    var f=e.target.files[0]; if(!f) return;
+    $("logoname").textContent=f.name;
+    $("logoclear").classList.remove("hide");
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      var img=new Image();
+      img.onload=function(){ state.logoImg=img; render(); };
+      img.src=ev.target.result;
+    };
+    reader.readAsDataURL(f);
+  });
+  $("logoclear").addEventListener("click",function(){
+    state.logoImg=null; $("logofile").value=""; $("logoname").textContent="no file yet";
+    this.classList.add("hide"); render();
+  });
+  $("logosize").addEventListener("input",function(){
+    state.logoSize=parseInt(this.value,10); $("logosizeval").textContent=this.value+"%"; render();
+  });
+
+  // ---- center text ----
+  $("centertext").addEventListener("input",function(){ state.centerText=this.value; render(); });
+
+  // ---- caption ----
+  $("caption").addEventListener("input",function(){ state.caption=this.value; render(); });
+
+  // ---- build QR matrix ----
+  function buildQR(){
+    var text=state.content || " ";
+    // High error correction when something covers the center, else medium
+    var ec = (state.centerMode!=="none") ? "H" : "M";
+    var qr;
+    for(var type=0; type<=40; type++){
+      try{
+        qr=qrcode(type, ec);
+        qr.addData(text);
+        qr.make();
+        break;
+      }catch(err){ qr=null; }
+    }
+    return qr;
+  }
+
+  function updateScanHint(modules){
+    var hint=$("scanhint"), txt=$("scantext");
+    if(state.centerMode==="none"){
+      hint.className="scanhint ok"; txt.textContent="Looks scannable";
+      return;
+    }
+    // rough coverage check: logo/text occupies logoSize% (or ~22% for text) of width
+    var cov = state.centerMode==="logo" ? state.logoSize : 20;
+    if(cov<=24){ hint.className="scanhint ok"; txt.textContent="Looks scannable — high error-correction on"; }
+    else { hint.className="scanhint warn"; txt.textContent="Logo is large — test before printing"; }
+  }
+
+  // ---- render to canvas ----
+  function render(){
+    var qr=buildQR();
+    if(!qr){ return; }
+    var count=qr.getModuleCount();
+    lastModules=count;
+    var SIZE=1000;
+    var quiet=4; // modules of quiet zone
+    var total=count+quiet*2;
+    var cell=SIZE/total;
+
+    canvas.width=SIZE; canvas.height=SIZE;
+    ctx.fillStyle=state.bg;
+    ctx.fillRect(0,0,SIZE,SIZE);
+    ctx.fillStyle=state.fg;
+    for(var r=0;r<count;r++){
+      for(var c=0;c<count;c++){
+        if(qr.isDark(r,c)){
+          ctx.fillRect(Math.floor((c+quiet)*cell),Math.floor((r+quiet)*cell),Math.ceil(cell),Math.ceil(cell));
+        }
+      }
+    }
+
+    // center overlay
+    if(state.centerMode==="logo" && state.logoImg){
+      drawCenterBox(SIZE, state.logoSize/100, function(x,y,w,h){
+        // draw image contained in box
+        var img=state.logoImg;
+        var ar=img.width/img.height;
+        var dw=w, dh=h;
+        if(ar>1){ dh=w/ar; } else { dw=h*ar; }
+        ctx.drawImage(img, x+(w-dw)/2, y+(h-dh)/2, dw, dh);
+      });
+    } else if(state.centerMode==="text" && state.centerText.trim()){
+      drawCenterBox(SIZE, 0.22, function(x,y,w,h){
+        ctx.fillStyle=state.centerTextColor;
+        var fs=h*0.6/Math.max(1,state.centerText.length*0.6);
+        fs=Math.min(fs, h*0.62);
+        ctx.font="600 "+fs+"px Inter, sans-serif";
+        ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.fillText(state.centerText, x+w/2, y+h/2+1);
+      });
+    }
+
+    updateScanHint(count);
+
+    // caption preview (rendered in DOM, and baked only on download)
+    $("capprev").textContent=state.caption||"";
+  }
+
+  function drawCenterBox(SIZE, frac, drawFn){
+    var boxW=SIZE*frac;
+    var pad=boxW*0.16;
+    var outer=boxW+pad*2;
+    var x=(SIZE-outer)/2, y=(SIZE-outer)/2;
+    // clear quiet pocket in bg color with slight rounding
+    ctx.fillStyle=state.bg;
+    roundRect(ctx,x,y,outer,outer,outer*0.12); ctx.fill();
+    drawFn(x+pad, y+pad, boxW, boxW);
+  }
+
+  function roundRect(c,x,y,w,h,r){
+    c.beginPath();
+    c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
+    c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
+  }
+
+  // ---- downloads ----
+  function currentComposite(scale){
+    // returns a canvas including caption if present
+    var base=canvas;
+    var cap=state.caption.trim();
+    var pad=Math.round(base.width*0.0);
+    var capH= cap ? Math.round(base.width*0.10) : 0;
+    var out=document.createElement("canvas");
+    out.width=base.width; out.height=base.height+capH;
+    var o=out.getContext("2d");
+    o.fillStyle=state.bg; o.fillRect(0,0,out.width,out.height);
+    o.drawImage(base,0,0);
+    if(cap){
+      o.fillStyle=state.fg;
+      o.font="500 "+Math.round(base.width*0.05)+"px Inter, sans-serif";
+      o.textAlign="center"; o.textBaseline="middle";
+      o.fillText(cap, out.width/2, base.height+capH/2);
+    }
+    return out;
+  }
+
+  $("dlpng").addEventListener("click",function(){
+    var out=currentComposite();
+    var a=document.createElement("a");
+    a.download="qr-code.png";
+    a.href=out.toDataURL("image/png");
+    a.click();
+  });
+
+  $("dlsvg").addEventListener("click",function(){
+    // build a crisp vector SVG of the modules (logo/text embedded as raster if present)
+    var qr=buildQR(); if(!qr) return;
+    var count=qr.getModuleCount(); var quiet=4; var total=count+quiet*2;
+    var parts=[];
+    parts.push('<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 '+total+' '+total+'">');
+    parts.push('<rect width="'+total+'" height="'+total+'" fill="'+state.bg+'"/>');
+    parts.push('<g fill="'+state.fg+'">');
+    for(var r=0;r<count;r++){ for(var c=0;c<count;c++){ if(qr.isDark(r,c)){ parts.push('<rect x="'+(c+quiet)+'" y="'+(r+quiet)+'" width="1" height="1"/>'); } } }
+    parts.push('</g>');
+    if(state.centerMode==="logo" && state.logoImg){
+      var frac=state.logoSize/100; var boxW=total*frac; var pad=boxW*0.16; var outer=boxW+pad*2;
+      var x=(total-outer)/2, y=(total-outer)/2;
+      parts.push('<rect x="'+x+'" y="'+y+'" width="'+outer+'" height="'+outer+'" rx="'+(outer*0.12)+'" fill="'+state.bg+'"/>');
+      parts.push('<image x="'+(x+pad)+'" y="'+(y+pad)+'" width="'+boxW+'" height="'+boxW+'" preserveAspectRatio="xMidYMid meet" href="'+state.logoImg.src+'"/>');
+    } else if(state.centerMode==="text" && state.centerText.trim()){
+      var f2=0.22; var bW=total*f2; var p2=bW*0.16; var o2=bW+p2*2;
+      var x2=(total-o2)/2, y2=(total-o2)/2;
+      parts.push('<rect x="'+x2+'" y="'+y2+'" width="'+o2+'" height="'+o2+'" rx="'+(o2*0.12)+'" fill="'+state.bg+'"/>');
+      parts.push('<text x="'+(total/2)+'" y="'+(total/2)+'" font-family="Inter,sans-serif" font-weight="600" font-size="'+(bW*0.5)+'" fill="'+state.centerTextColor+'" text-anchor="middle" dominant-baseline="central">'+escapeXml(state.centerText)+'</text>');
+    }
+    parts.push('</svg>');
+    var blob=new Blob([parts.join("")],{type:"image/svg+xml"});
+    var a=document.createElement("a");
+    a.download="qr-code.svg";
+    a.href=URL.createObjectURL(blob);
+    a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+  });
+
+  function escapeXml(s){return s.replace(/[<>&'"]/g,function(ch){return {'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[ch];});}
+
+  render();
+})();
+</script>
+</body>
+</html>

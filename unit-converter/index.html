@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit converter · Sahil's tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     THEME — pure black & white, one tiny accent.
+     Change --accent once here to re-tint the whole tool.
+     ============================================================ */
+  :root{
+    --bg:#FFFFFF;        /* page background */
+    --ink:#0A0A0A;       /* main text (near-black) */
+    --line:#E4E4E4;      /* hairline borders */
+    --line2:#CFCFCF;     /* stronger borders (inputs) */
+    --muted:#6B6B6B;     /* secondary text */
+    --card:#FAFAFA;      /* panel background */
+    --accent:#0A0A0A;    /* the "tiny accent" — black by default; try #1F4FD8 for blue */
+    --on-accent:#FFFFFF; /* text on accent buttons */
+    --radius:12px; --ctrl:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:720px;margin:0 auto;padding:20px 20px 64px;}
+
+  /* ---- shared header / footer (same on every tool) ---- */
+  header.site{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 22px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;}
+  .brand .mark{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;}
+  .brand a{color:inherit;text-decoration:none;}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);font-weight:500;}
+  .privacy svg{width:15px;height:15px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);text-decoration:none;margin-bottom:14px;}
+  .back svg{width:15px;height:15px;}.back:hover{color:var(--ink);}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,44px);letter-spacing:-0.02em;margin:0 0 6px;}
+  .sub{font-size:15px;color:var(--muted);margin:0 0 20px;}
+
+  /* ---- the "what is this" explainer box (every tool has one) ---- */
+  .about{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:22px;font-size:13.5px;color:var(--muted);}
+  .about b{color:var(--ink);font-weight:600;}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
+  .catrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+  .cat{font-family:'Inter';font-size:13px;font-weight:500;padding:8px 14px;border-radius:999px;border:1px solid var(--line2);background:#fff;color:var(--muted);cursor:pointer;transition:all .15s;}
+  .cat:hover{background:#F0F0F0;color:var(--ink);}
+  .cat.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  .convert{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:end;}
+  @media(max-width:560px){.convert{grid-template-columns:1fr;}.swap{justify-self:center;transform:rotate(90deg);}}
+  label.lbl{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.03em;}
+  input[type=text],select{width:100%;font-family:'Inter';font-size:15px;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:var(--ctrl);padding:11px 12px;transition:border-color .15s,box-shadow .15s;}
+  input[type=text]:focus,select:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(10,10,10,0.08);}
+  input.big{font-size:22px;font-family:'JetBrains Mono',monospace;font-weight:500;}
+  select{margin-top:8px;cursor:pointer;}
+  .swap{background:#fff;border:1px solid var(--line2);border-radius:50%;width:40px;height:40px;display:grid;place-items:center;cursor:pointer;margin-bottom:2px;transition:all .15s;}
+  .swap:hover{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .swap svg{width:18px;height:18px;}
+
+  .result{margin-top:20px;padding:16px;background:#fff;border:1px solid var(--line);border-radius:var(--ctrl);text-align:center;}
+  .result .big{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:500;}
+  .result .small{font-size:13px;color:var(--muted);margin-top:4px;}
+
+  .foot{margin-top:34px;font-size:12.5px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <div class="brand"><span class="mark">S</span><a href="/">sahil's tools</a></div>
+    <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Runs in your browser</span>
+  </header>
+  <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>All tools</a>
+
+  <h1>Unit converter</h1>
+  <p class="sub">Length, weight, temperature, volume, area, speed, and data — all in one place.</p>
+
+  <!-- WHAT THIS DOES: plain-English explainer shown to every visitor -->
+  <div class="about">
+    <b>What this does.</b> Pick a category, type a number, and it instantly converts between two units — both directions. Change either the value or a unit and the answer updates live. Temperature uses proper formulas (not just multiplication), so °C↔°F↔K are accurate. Everything is calculated on your device; nothing is sent anywhere.
+  </div>
+
+  <div class="panel">
+    <div class="catrow" id="cats"></div>
+
+    <div class="convert">
+      <div>
+        <label class="lbl">From</label>
+        <input type="text" id="fromVal" class="big" value="1" inputmode="decimal">
+        <select id="fromUnit"></select>
+      </div>
+      <button class="swap" id="swap" title="Swap units"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 10l5-5 5 5M7 14l5 5 5-5"/></svg></button>
+      <div>
+        <label class="lbl">To</label>
+        <input type="text" id="toVal" class="big" readonly>
+        <select id="toUnit"></select>
+      </div>
+    </div>
+
+    <div class="result">
+      <div class="big" id="resultBig">—</div>
+      <div class="small" id="resultSmall"></div>
+    </div>
+  </div>
+
+  <p class="foot">Made for sahilshaikh.org · runs entirely in your browser</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+     UNIT DATA
+     Every category (except temperature) works by a "factor to a
+     base unit". To convert: value → base → target.
+       base value = input * factor[fromUnit]
+       output     = base value / factor[toUnit]
+     Temperature is special (handled separately below) because it
+     needs add/subtract offsets, not just multiplication.
+     ============================================================ */
+  var CATEGORIES = {
+    Length: {
+      base:"meter",
+      units:{
+        "Millimeter (mm)":0.001, "Centimeter (cm)":0.01, "Meter (m)":1,
+        "Kilometer (km)":1000, "Inch (in)":0.0254, "Foot (ft)":0.3048,
+        "Yard (yd)":0.9144, "Mile (mi)":1609.344, "Nautical mile":1852
+      }
+    },
+    Weight: {
+      base:"kilogram",
+      units:{
+        "Milligram (mg)":0.000001, "Gram (g)":0.001, "Kilogram (kg)":1,
+        "Tonne (t)":1000, "Ounce (oz)":0.0283495, "Pound (lb)":0.453592,
+        "Stone (st)":6.35029
+      }
+    },
+    Volume: {
+      base:"liter",
+      units:{
+        "Milliliter (ml)":0.001, "Liter (l)":1, "Cubic meter (m³)":1000,
+        "Teaspoon (US)":0.00492892, "Tablespoon (US)":0.0147868,
+        "Fluid ounce (US)":0.0295735, "Cup (US)":0.236588,
+        "Pint (US)":0.473176, "Quart (US)":0.946353, "Gallon (US)":3.78541
+      }
+    },
+    Area: {
+      base:"square meter",
+      units:{
+        "Square cm (cm²)":0.0001, "Square meter (m²)":1, "Hectare (ha)":10000,
+        "Square km (km²)":1000000, "Square inch (in²)":0.00064516,
+        "Square foot (ft²)":0.092903, "Acre":4046.86
+      }
+    },
+    Speed: {
+      base:"meter/second",
+      units:{
+        "Meter/sec (m/s)":1, "Kilometer/hour (km/h)":0.277778,
+        "Mile/hour (mph)":0.44704, "Foot/sec (ft/s)":0.3048, "Knot":0.514444
+      }
+    },
+    Data: {
+      base:"byte",
+      units:{
+        "Bit":0.125, "Byte":1, "Kilobyte (KB)":1024, "Megabyte (MB)":1048576,
+        "Gigabyte (GB)":1073741824, "Terabyte (TB)":1099511627776
+      }
+    },
+    Temperature: {
+      special:true,
+      units:{ "Celsius (°C)":"C", "Fahrenheit (°F)":"F", "Kelvin (K)":"K" }
+    }
+  };
+
+  var $=function(id){return document.getElementById(id);};
+  var current="Length";
+
+  /* ---- BUILD CATEGORY PILLS ---- */
+  function renderCats(){
+    var host=$("cats"); host.innerHTML="";
+    Object.keys(CATEGORIES).forEach(function(name){
+      var b=document.createElement("button");
+      b.className="cat"+(name===current?" on":"");
+      b.textContent=name;
+      b.onclick=function(){ current=name; renderCats(); fillUnits(); convert(); };
+      host.appendChild(b);
+    });
+  }
+
+  /* ---- FILL THE TWO UNIT DROPDOWNS for the current category ---- */
+  function fillUnits(){
+    var cat=CATEGORIES[current];
+    var names=Object.keys(cat.units);
+    var f=$("fromUnit"), t=$("toUnit");
+    f.innerHTML=""; t.innerHTML="";
+    names.forEach(function(n){
+      f.add(new Option(n,n));
+      t.add(new Option(n,n));
+    });
+    // sensible defaults: first unit → second unit
+    f.selectedIndex=0;
+    t.selectedIndex=Math.min(1,names.length-1);
+  }
+
+  /* ============================================================
+     TEMPERATURE CONVERSION (the special case)
+     Convert whatever the input is → Celsius, then Celsius → target.
+     ============================================================ */
+  function tempConvert(val, from, to){
+    var c; // step 1: get to Celsius
+    if(from==="Celsius (°C)") c=val;
+    else if(from==="Fahrenheit (°F)") c=(val-32)*5/9;
+    else c=val-273.15; // Kelvin
+    // step 2: Celsius → target
+    if(to==="Celsius (°C)") return c;
+    if(to==="Fahrenheit (°F)") return c*9/5+32;
+    return c+273.15; // Kelvin
+  }
+
+  /* ---- FORMAT a number cleanly (trim trailing zeros, avoid ugly floats) ---- */
+  function fmt(n){
+    if(!isFinite(n)) return "—";
+    if(n===0) return "0";
+    var abs=Math.abs(n);
+    // very large / very small → scientific-ish rounding
+    var s = (abs>=1e9 || abs<1e-4) ? n.toExponential(4) : n.toFixed(6);
+    if(s.indexOf(".")>-1) s=s.replace(/\.?0+$/,""); // strip trailing zeros
+    return s;
+  }
+
+  /* ---- THE MAIN CONVERSION ---- */
+  function convert(){
+    var raw=$("fromVal").value.replace(/,/g,"").trim();
+    var val=parseFloat(raw);
+    var from=$("fromUnit").value, to=$("toUnit").value;
+    if(raw==="" || isNaN(val)){ $("toVal").value=""; $("resultBig").textContent="—"; $("resultSmall").textContent=""; return; }
+
+    var out;
+    var cat=CATEGORIES[current];
+    if(cat.special){                       // temperature path
+      out=tempConvert(val, from, to);
+    } else {                               // everything else: factor path
+      var baseVal=val*cat.units[from];     // input → base unit
+      out=baseVal/cat.units[to];           // base unit → target
+    }
+
+    $("toVal").value=fmt(out);
+    $("resultBig").textContent=fmt(val)+" "+shortName(from)+"  =  "+fmt(out)+" "+shortName(to);
+    $("resultSmall").textContent=current+" conversion";
+  }
+
+  /* ---- pull the short symbol out of "Kilometer (km)" → "km" ---- */
+  function shortName(full){
+    var m=full.match(/\(([^)]+)\)/);
+    return m?m[1]:full;
+  }
+
+  /* ---- SWAP the two units ---- */
+  $("swap").onclick=function(){
+    var f=$("fromUnit"), t=$("toUnit");
+    var tmp=f.value; f.value=t.value; t.value=tmp;
+    // also move the converted number into the input so it "flows"
+    var cur=$("toVal").value;
+    if(cur!=="") $("fromVal").value=cur;
+    convert();
+  };
+
+  /* ---- WIRE UP live updates ---- */
+  $("fromVal").addEventListener("input",convert);
+  $("fromUnit").addEventListener("change",convert);
+  $("toUnit").addEventListener("change",convert);
+
+  /* ---- START ---- */
+  renderCats();
+  fillUnits();
+  convert();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EXIF remover · Sahil's tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root{--bg:#FFFFFF;--ink:#0A0A0A;--line:#E4E4E4;--line2:#CFCFCF;--muted:#6B6B6B;--card:#FAFAFA;--radius:12px;--ctrl:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 20px 64px;}
+  header.site{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 22px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;}
+  .brand .mark{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;}
+  .brand a{color:inherit;text-decoration:none;}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);font-weight:500;}.privacy svg{width:15px;height:15px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);text-decoration:none;margin-bottom:14px;}.back svg{width:15px;height:15px;}.back:hover{color:var(--ink);}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,44px);letter-spacing:-0.02em;margin:0 0 6px;}
+  .sub{font-size:15px;color:var(--muted);margin:0 0 20px;}
+  .about{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:22px;font-size:13.5px;color:var(--muted);}
+  .about b{color:var(--ink);font-weight:600;}
+  .drop{border:2px dashed var(--line2);border-radius:var(--radius);padding:38px 20px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:14px;}
+  .drop:hover,.drop.on{border-color:var(--ink);background:var(--card);}
+  .drop .big{font-weight:600;font-size:15px;margin-bottom:4px;}
+  .drop .small{font-size:13px;color:var(--muted);}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+  label.inline{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:7px;}
+  select{font-family:'Inter';font-size:13.5px;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:var(--ctrl);padding:8px 10px;}
+  .btn{font-family:'Inter';font-size:13.5px;font-weight:500;padding:10px 14px;border-radius:var(--ctrl);cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink);display:inline-flex;align-items:center;gap:7px;transition:all .15s;}
+  .btn:hover{background:#F0F0F0;}.btn.dark{background:var(--ink);color:#fff;border-color:var(--ink);}.btn svg{width:15px;height:15px;}
+  .item{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px;font-size:13.5px;}
+  .item img{width:44px;height:44px;object-fit:cover;border-radius:8px;border:1px solid var(--line);}
+  .item .nm{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;}
+  .item .sz{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+  .item .spacer{flex:1;}
+  .ok{font-size:11px;font-weight:600;color:#1D7D53;background:#E3F3EB;padding:3px 8px;border-radius:6px;text-transform:uppercase;}
+  .foot{margin-top:34px;font-size:12.5px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <div class="brand"><span class="mark">S</span><a href="/">sahil's tools</a></div>
+    <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Runs in your browser</span>
+  </header>
+  <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>All tools</a>
+
+  <h1>EXIF remover</h1>
+  <p class="sub">Strip hidden metadata — GPS location, camera details, timestamps — from photos before sharing.</p>
+
+  <div class="about">
+    <b>What this does.</b> Photos carry invisible metadata (EXIF): often the exact <b>GPS location</b> where they were taken, the device model, and timestamps. This tool redraws each image onto a clean canvas and re-exports it — which by nature <b>discards all metadata</b> — right on your device; nothing is uploaded. Choose JPEG (small files) or PNG (pixel-perfect). Download images one by one, or all together as a zip. Note: because the image is re-encoded, file size may change slightly.
+  </div>
+
+  <div class="drop" id="drop">
+    <div class="big">Drop photos here, or click to choose</div>
+    <div class="small">JPEG, PNG, WebP — as many as you like</div>
+    <input type="file" id="file" accept="image/*" multiple style="display:none;">
+  </div>
+
+  <div class="row">
+    <label class="inline">Output format
+      <select id="fmt"><option value="image/jpeg">JPEG (smaller)</option><option value="image/png">PNG (lossless)</option></select>
+    </label>
+    <span style="flex:1;"></span>
+    <button class="btn dark" id="zipAll" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Download all (zip)</button>
+  </div>
+
+  <div id="list"></div>
+
+  <p class="foot">Made for sahilshaikh.org · runs entirely in your browser</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var cleaned=[]; // {name, blob}
+
+  function kb(n){ return (n/1024).toFixed(0)+" KB"; }
+
+  /* ============================================================
+     CLEANING = draw to canvas, export fresh.
+     A canvas only holds pixels, so the exported file physically
+     cannot contain the original EXIF block. That's the guarantee.
+     ============================================================ */
+  function clean(file){
+    var img=new Image();
+    var url=URL.createObjectURL(file);
+    img.onload=function(){
+      var c=document.createElement("canvas");
+      c.width=img.naturalWidth; c.height=img.naturalHeight;
+      c.getContext("2d").drawImage(img,0,0);
+      URL.revokeObjectURL(url);
+      var type=$("fmt").value;
+      c.toBlob(function(blob){
+        var base=file.name.replace(/\.[^.]+$/,"");
+        var ext=type==="image/png"?".png":".jpg";
+        var name=base+"-clean"+ext;
+        cleaned.push({name:name,blob:blob});
+        addItem(file,name,blob,c);
+        $("zipAll").style.display=cleaned.length>1?"inline-flex":"none";
+      }, type, 0.92);
+    };
+    img.onerror=function(){ URL.revokeObjectURL(url); alert("Couldn't read "+file.name); };
+    img.src=url;
+  }
+
+  function addItem(orig,name,blob,canvas){
+    var div=document.createElement("div"); div.className="item";
+    var thumb=document.createElement("img");
+    // small preview from the cleaned canvas
+    var t=document.createElement("canvas"); var s=Math.min(1,88/Math.max(canvas.width,canvas.height));
+    t.width=canvas.width*s; t.height=canvas.height*s;
+    t.getContext("2d").drawImage(canvas,0,0,t.width,t.height);
+    thumb.src=t.toDataURL();
+    div.appendChild(thumb);
+    var info=document.createElement("div");
+    info.innerHTML='<div class="nm">'+name+'</div><div class="sz">'+kb(orig.size)+' → '+kb(blob.size)+'</div>';
+    div.appendChild(info);
+    var sp=document.createElement("div"); sp.className="spacer"; div.appendChild(sp);
+    var ok=document.createElement("span"); ok.className="ok"; ok.textContent="metadata gone"; div.appendChild(ok);
+    var b=document.createElement("button"); b.className="btn";
+    b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Save';
+    b.onclick=function(){
+      var a=document.createElement("a");
+      a.href=URL.createObjectURL(blob); a.download=name; a.click();
+      setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+    };
+    div.appendChild(b);
+    $("list").appendChild(div);
+  }
+
+  /* ---- zip everything ---- */
+  $("zipAll").onclick=function(){
+    var zip=new JSZip();
+    cleaned.forEach(function(f){ zip.file(f.name,f.blob); });
+    zip.generateAsync({type:"blob"}).then(function(blob){
+      var a=document.createElement("a");
+      a.href=URL.createObjectURL(blob); a.download="clean-photos.zip"; a.click();
+      setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+    });
+  };
+
+  /* ---- input wiring ---- */
+  var drop=$("drop");
+  drop.onclick=function(){ $("file").click(); };
+  $("file").addEventListener("change",function(){ [].forEach.call(this.files,clean); this.value=""; });
+  drop.addEventListener("dragover",function(e){ e.preventDefault(); drop.classList.add("on"); });
+  drop.addEventListener("dragleave",function(){ drop.classList.remove("on"); });
+  drop.addEventListener("drop",function(e){
+    e.preventDefault(); drop.classList.remove("on");
+    [].forEach.call(e.dataTransfer.files,function(f){ if(/^image\//.test(f.type)) clean(f); });
+  });
+})();
+</script>
+</body>
+</html>

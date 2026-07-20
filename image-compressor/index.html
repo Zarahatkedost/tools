@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image compressor · Sahil's tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root{--paper:#F5F2EC;--ink:#1C1B19;--line:#DEDACF;--line2:#CBC6B8;--accent:#1F4FD8;--accent-ink:#15379a;--muted:#6E6A60;--card:#FCFAF6;--ok:#1D7D53;--radius:12px;--ctrl:10px;}
+  *{box-sizing:border-box;}html,body{margin:0;}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 20px 64px;}
+  header.site{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 22px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;}
+  .brand .mark{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;}
+  .brand a{color:inherit;text-decoration:none;}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ok);font-weight:500;}.privacy svg{width:15px;height:15px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);text-decoration:none;margin-bottom:14px;}.back svg{width:15px;height:15px;}.back:hover{color:var(--ink);}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,44px);letter-spacing:-0.02em;margin:0 0 6px;}
+  .sub{font-size:15px;color:var(--muted);margin:0 0 24px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
+  .drop{border:1.5px dashed var(--line2);border-radius:var(--ctrl);padding:34px 20px;text-align:center;cursor:pointer;transition:all .15s;}
+  .drop:hover,.drop.over{background:#F3EFE6;border-color:var(--accent);}
+  .drop svg{width:34px;height:34px;color:var(--muted);}
+  .drop p{margin:10px 0 0;font-size:14px;color:var(--muted);}
+  .controls{display:flex;align-items:center;gap:16px;margin:18px 0;flex-wrap:wrap;}
+  .controls label{font-size:13px;color:var(--muted);font-weight:500;}
+  input[type=range]{-webkit-appearance:none;height:4px;border-radius:4px;background:var(--line2);outline:none;flex:1;min-width:140px;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+  .qval{font-family:'JetBrains Mono',monospace;font-size:13px;min-width:38px;}
+  .maxw{font-family:'JetBrains Mono',monospace;font-size:13px;width:90px;padding:8px 10px;border:1px solid var(--line2);border-radius:8px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px;}
+  th{text-align:left;font-weight:500;color:var(--muted);font-size:12px;padding:6px 4px;border-bottom:1px solid var(--line);}
+  td{padding:9px 4px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  td.num{text-align:right;font-family:'JetBrains Mono',monospace;}
+  td .save{color:var(--ok);font-weight:500;}
+  .thumb{width:34px;height:34px;object-fit:cover;border-radius:6px;border:1px solid var(--line);vertical-align:middle;margin-right:8px;}
+  .fname{display:inline-block;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;}
+  .btn{font-family:'Inter';font-size:14px;font-weight:500;padding:11px 16px;border-radius:var(--ctrl);cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:all .15s;}
+  .btn:hover{background:#F3EFE6;}.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}.btn.primary:hover{background:var(--accent-ink);}.btn svg{width:16px;height:16px;}.btn.full{width:100%;}.btn.sm{font-size:12px;padding:6px 10px;}
+  .dlrow{margin-top:16px;display:flex;gap:8px;}
+  .foot{margin-top:34px;font-size:12.5px;color:var(--muted);text-align:center;}
+  .totals{font-size:13px;color:var(--muted);margin-top:12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <div class="brand"><span class="mark">S</span><a href="/">sahil's tools</a></div>
+    <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Images never leave your device</span>
+  </header>
+  <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>All tools</a>
+  <h1>Image compressor</h1>
+  <p class="sub">Shrink one image or a whole batch. Drop files in, set the quality, download — single files or a zip.</p>
+
+  <div class="panel">
+    <div class="drop" id="drop">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M8 8l4-4 4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+      <p>Drop images here or tap to choose (JPG, PNG, WebP)</p>
+      <input type="file" id="file" accept="image/*" multiple hidden>
+    </div>
+
+    <div class="controls">
+      <label>Quality</label>
+      <input type="range" id="quality" min="30" max="95" value="70" step="1">
+      <span class="qval" id="qval">70%</span>
+      <label style="margin-left:10px;">Max width</label>
+      <input type="text" class="maxw" id="maxw" placeholder="e.g. 1920" value="">
+    </div>
+
+    <table id="tbl" style="display:none;">
+      <thead><tr><th>File</th><th style="text-align:right;">Before</th><th></th><th style="text-align:right;">After</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <p class="totals" id="totals"></p>
+
+    <div class="dlrow" id="dlrow" style="display:none;">
+      <button class="btn primary full" id="dlall"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Download all (zip)</button>
+      <button class="btn" id="clearBtn">Clear</button>
+    </div>
+  </div>
+  <p class="foot">Made for sahilshaikh.org · runs entirely in your browser</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var items=[]; // {name, origSize, blob, url, thumb}
+
+  function human(b){ if(b<1024)return b+" B"; if(b<1048576)return (b/1024).toFixed(0)+" KB"; return (b/1048576).toFixed(2)+" MB"; }
+
+  function process(file){
+    return new Promise(function(res){
+      var img=new Image(); var url=URL.createObjectURL(file);
+      img.onload=function(){
+        var q=parseInt($("quality").value,10)/100;
+        var maxw=parseInt($("maxw").value,10);
+        var w=img.width,h=img.height;
+        if(maxw && w>maxw){ h=Math.round(h*maxw/w); w=maxw; }
+        var cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+        var cx=cv.getContext("2d"); cx.drawImage(img,0,0,w,h);
+        // output type: keep png transparency only if source is png AND has alpha? simpler: jpeg unless png w/o benefit. Use webp when smaller.
+        var outType="image/jpeg";
+        cv.toBlob(function(blob){
+          URL.revokeObjectURL(url);
+          res({name:file.name.replace(/\.(png|jpe?g|webp|gif|bmp)$/i,"")+".jpg", origSize:file.size, blob:blob, url:cv.toDataURL("image/jpeg",0.4)});
+        }, outType, q);
+      };
+      img.onerror=function(){ URL.revokeObjectURL(url); res(null); };
+      img.src=url;
+    });
+  }
+
+  function addFiles(files){
+    var arr=[].slice.call(files).filter(function(f){return /^image\//.test(f.type);});
+    if(!arr.length) return;
+    Promise.all(arr.map(process)).then(function(results){
+      results.forEach(function(r){ if(r) items.push(r); });
+      renderTable();
+    });
+  }
+
+  function reprocessAll(){
+    // re-run from original files not kept; simplest: keep original File objects
+  }
+
+  function renderTable(){
+    var tb=$("tbody"); tb.innerHTML="";
+    if(!items.length){ $("tbl").style.display="none"; $("dlrow").style.display="none"; $("totals").textContent=""; return; }
+    $("tbl").style.display="table"; $("dlrow").style.display="flex";
+    var totO=0,totN=0;
+    items.forEach(function(it,i){
+      totO+=it.origSize; totN+=it.blob.size;
+      var tr=document.createElement("tr");
+      tr.innerHTML='<td><img class="thumb" src="'+it.url+'"><span class="fname">'+it.name+'</span></td>'+
+        '<td class="num">'+human(it.origSize)+'</td>'+
+        '<td class="num" style="color:var(--muted);">→</td>'+
+        '<td class="num"><span class="save">'+human(it.blob.size)+'</span> <button class="btn sm" data-dl="'+i+'">get</button></td>';
+      tb.appendChild(tr);
+    });
+    tb.querySelectorAll("[data-dl]").forEach(function(b){ b.onclick=function(){ var it=items[+this.dataset.dl]; var a=document.createElement("a"); a.download=it.name; a.href=URL.createObjectURL(it.blob); a.click(); }; });
+    var pct=totO?Math.round((1-totN/totO)*100):0;
+    $("totals").textContent=items.length+" image"+(items.length>1?"s":"")+" · "+human(totO)+" → "+human(totN)+" ("+pct+"% smaller)";
+  }
+
+  // drag/drop + click
+  var drop=$("drop");
+  drop.onclick=function(){ $("file").click(); };
+  $("file").onchange=function(){ addFiles(this.files); this.value=""; };
+  ["dragover","dragenter"].forEach(function(e){ drop.addEventListener(e,function(ev){ ev.preventDefault(); drop.classList.add("over"); }); });
+  ["dragleave","drop"].forEach(function(e){ drop.addEventListener(e,function(ev){ ev.preventDefault(); drop.classList.remove("over"); }); });
+  drop.addEventListener("drop",function(ev){ addFiles(ev.dataTransfer.files); });
+
+  $("quality").oninput=function(){ $("qval").textContent=this.value+"%"; };
+
+  $("dlall").onclick=function(){
+    if(!items.length) return;
+    var zip=new JSZip();
+    items.forEach(function(it){ zip.file(it.name, it.blob); });
+    zip.generateAsync({type:"blob"}).then(function(content){
+      var a=document.createElement("a"); a.download="compressed-images.zip"; a.href=URL.createObjectURL(content); a.click();
+    });
+  };
+  $("clearBtn").onclick=function(){ items=[]; renderTable(); };
+})();
+</script>
+</body>
+</html>

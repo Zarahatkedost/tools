@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense splitter · Sahil's tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#FFFFFF;--ink:#0A0A0A;--line:#E4E4E4;--line2:#CFCFCF;--muted:#6B6B6B;--card:#FAFAFA;--radius:12px;--ctrl:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:720px;margin:0 auto;padding:20px 20px 64px;}
+  header.site{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 22px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;}
+  .brand .mark{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;}
+  .brand a{color:inherit;text-decoration:none;}
+  .privacy{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);font-weight:500;}.privacy svg{width:15px;height:15px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);text-decoration:none;margin-bottom:14px;}.back svg{width:15px;height:15px;}.back:hover{color:var(--ink);}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,44px);letter-spacing:-0.02em;margin:0 0 6px;}
+  .sub{font-size:15px;color:var(--muted);margin:0 0 20px;}
+  .about{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:22px;font-size:13.5px;color:var(--muted);}
+  .about b{color:var(--ink);font-weight:600;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;}
+  .card h2{font-family:'Fraunces',serif;font-weight:600;font-size:17px;margin-bottom:10px;}
+  label{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin:8px 0 4px;}
+  input,select{font-family:'Inter';font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:var(--ctrl);padding:9px 11px;width:100%;}
+  input:focus,select:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(10,10,10,0.07);}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:560px){.grid3{grid-template-columns:1fr;}.grid2{grid-template-columns:1fr;}}
+  .person{display:flex;gap:10px;align-items:center;margin-bottom:8px;}
+  .person input.nm{flex:2;}
+  .person input.wt{flex:1;max-width:110px;}
+  .person .owe{font-family:'JetBrains Mono',monospace;font-weight:600;min-width:110px;text-align:right;font-size:15px;}
+  .btn{font-family:'Inter';font-size:13.5px;font-weight:500;padding:10px 14px;border-radius:var(--ctrl);cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink);display:inline-flex;align-items:center;gap:7px;transition:all .15s;}
+  .btn:hover{background:#F0F0F0;}.btn.dark{background:var(--ink);color:#fff;border-color:var(--ink);}.btn svg{width:15px;height:15px;}
+  .rm{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;border-radius:6px;}
+  .rm:hover{color:#B23B2E;background:#f4ece9;}.rm svg{width:15px;height:15px;display:block;}
+  .summary{background:var(--ink);color:#fff;border-radius:var(--radius);padding:16px 18px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-top:14px;}
+  .summary .b{font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:#bbb;}
+  .summary .v{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600;}
+  .foot{margin-top:34px;font-size:12.5px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <div class="brand"><span class="mark">S</span><a href="/">sahil's tools</a></div>
+    <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Runs in your browser</span>
+  </header>
+  <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>All tools</a>
+
+  <h1>Expense splitter</h1>
+  <p class="sub">Split a bill with tax and tip — evenly, or with different shares per person.</p>
+
+  <div class="about">
+    <b>What this does.</b> Enter the bill, tax % and tip %, add the people, and it shows exactly what each person owes. By default everyone pays equally; change a person's <b>share weight</b> to make them pay more or less (weight 2 = pays double a weight-1 person; 0.5 = pays half). Tip can be calculated on the pre-tax or post-tax amount — restaurants differ, so it's your choice.
+  </div>
+
+  <div class="card">
+    <h2>The bill</h2>
+    <div class="grid3">
+      <div><label>Bill amount</label><input type="number" id="bill" min="0" step="any" placeholder="0.00"></div>
+      <div><label>Tax %</label><input type="number" id="tax" min="0" step="any" value="0"></div>
+      <div><label>Tip %</label><input type="number" id="tip" min="0" step="any" value="0"></div>
+    </div>
+    <div class="grid2" style="margin-top:4px;">
+      <div>
+        <label>Tip calculated on</label>
+        <select id="tipBase"><option value="pre">Pre-tax amount</option><option value="post">Post-tax amount</option></select>
+      </div>
+      <div>
+        <label>Currency label</label>
+        <select id="cur"><option>QAR</option><option>USD</option><option>EUR</option><option>GBP</option><option>AED</option><option>SAR</option><option>INR</option></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>People</h2>
+    <div style="display:flex;gap:10px;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">
+      <span style="flex:2;">Name</span><span style="flex:1;max-width:110px;">Share weight</span><span style="min-width:110px;text-align:right;">Owes</span><span style="width:24px;"></span>
+    </div>
+    <div id="people"></div>
+    <button class="btn" id="addP" style="margin-top:6px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add person</button>
+  </div>
+
+  <div class="summary">
+    <div><div class="b">Grand total</div><div class="v" id="sGrand">0.00</div></div>
+    <div><div class="b">Tax</div><div class="v" id="sTax">0.00</div></div>
+    <div><div class="b">Tip</div><div class="v" id="sTip">0.00</div></div>
+    <div><div class="b">People</div><div class="v" id="sN">0</div></div>
+  </div>
+
+  <p class="foot">Made for sahilshaikh.org · runs entirely in your browser</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  function fmt(n){ return (isFinite(n)?n:0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+  /* ---- people rows ---- */
+  var count=0;
+  function addPerson(name){
+    count++;
+    var div=document.createElement("div"); div.className="person";
+    div.innerHTML='<input class="nm" placeholder="Person '+count+'" value="'+(name||"")+'">'+
+      '<input class="wt" type="number" min="0" step="0.5" value="1">'+
+      '<span class="owe">0.00</span>'+
+      '<button class="rm" aria-label="remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>';
+    $("people").appendChild(div);
+    div.querySelector(".rm").onclick=function(){ div.remove(); calc(); };
+    div.querySelectorAll("input").forEach(function(i){ i.addEventListener("input",calc); });
+    calc();
+  }
+
+  /* ============================================================
+     THE MATH
+     tax  = bill × tax%
+     tip  = (bill  or  bill+tax) × tip%   depending on tipBase
+     grand = bill + tax + tip
+     each person pays grand × (their weight ÷ total weight)
+     ============================================================ */
+  function calc(){
+    var bill=parseFloat($("bill").value)||0;
+    var taxP=parseFloat($("tax").value)||0;
+    var tipP=parseFloat($("tip").value)||0;
+    var tax=bill*taxP/100;
+    var tipBase=($("tipBase").value==="post") ? (bill+tax) : bill;
+    var tip=tipBase*tipP/100;
+    var grand=bill+tax+tip;
+
+    var rows=[].slice.call(document.querySelectorAll("#people .person"));
+    var weights=rows.map(function(r){ return Math.max(0, parseFloat(r.querySelector(".wt").value)||0); });
+    var totalW=weights.reduce(function(a,b){return a+b;},0);
+
+    rows.forEach(function(r,i){
+      var share=totalW>0 ? grand*weights[i]/totalW : 0;
+      r.querySelector(".owe").textContent=fmt(share);
+    });
+
+    $("sGrand").textContent=fmt(grand);
+    $("sTax").textContent=fmt(tax);
+    $("sTip").textContent=fmt(tip);
+    $("sN").textContent=rows.length;
+  }
+
+  ["bill","tax","tip"].forEach(function(id){ $(id).addEventListener("input",calc); });
+  $("tipBase").addEventListener("change",calc);
+  $("cur").addEventListener("change",calc);
+  $("addP").onclick=function(){ addPerson(); };
+
+  /* start with two people */
+  addPerson(); addPerson();
+})();
+</script>
+</body>
+</html>
